@@ -760,438 +760,130 @@ function wpb_get_archive_title() {
     return '';
 }
 
-/**
- * Get active template for a WooCommerce page type
- */
-function wpb_get_active_template($type) {
-    $args = [
-        'post_type'   => 'wpb_template',
-        'post_status' => ['publish', 'draft'],
-        'meta_key'    => '_wpb_template_type',
-        'meta_value'  => $type,
-        'meta_query'  => [
-            [
-                'key'   => '_wpb_template_active',
-                'value' => '1',
-            ],
-        ],
-        'posts_per_page' => 1,
-    ];
-
-    $templates = get_posts($args);
-    return $templates ? $templates[0] : false;
-}
-
-/**
- * Override WooCommerce templates
- */
-add_filter('template_include', function($template) {
-    if (!function_exists('is_woocommerce')) {
-        return $template;
-    }
-
-    $type = null;
-    if (is_product()) {
-        $type = 'product';
-    } elseif (is_product_category()) {
-        $type = 'product-category';
-    } elseif (is_product_tag()) {
-        $type = 'product-tag';
-    } elseif (is_shop()) {
-        $type = 'shop';
-    } elseif (is_cart()) {
-        $type = 'cart';
-    } elseif (is_checkout()) {
-        $type = 'checkout';
-    } elseif (is_account_page()) {
-        $type = 'myaccount';
-    }
-
-    if (!$type) {
-        return $template;
-    }
-
-    $active_template = wpb_get_active_template($type);
-    if (!$active_template && in_array($type, ['shop', 'product-category', 'product-tag'], true)) {
-        $active_template = wpb_get_active_template('archive');
-    }
-
-    if (!$active_template) {
-        return $template;
-    }
-
-    $template_id = (int) $active_template->ID;
-
-    if (class_exists('\Elementor\Plugin')) {
-        $document = \Elementor\Plugin::$instance->documents->get($template_id);
-        if ($document && $document->is_built_with_elementor()) {
-            $document->update_runtime_elements();
-            $css_file = \Elementor\Core\Files\CSS\Post::create($template_id);
-
-            if (method_exists($css_file, 'update')) {
-                $css_file->update();
-            }
-        }
-    }
-
-    global $wpb_active_template;
-    $wpb_active_template = $active_template;
-
-    return WPB_PLUGIN_PATH . 'templates/override.php';
-}, 9999);
-
-/**
- * Ensure Elementor atomic CSS directory exists and is writable.
- * Elementor 4.x stores atomic/container widget styles in external CSS files
- * under wp-content/uploads/elementor/css/. If this directory is missing or
- * not writable, atomic styles are silently dropped on the frontend.
- */
-function wpb_ensure_elementor_css_dir() {
-    $upload_dir = wp_upload_dir();
-
-    if (!empty($upload_dir['error'])) {
-        return false;
-    }
-
-    $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-    $parent_dir = trailingslashit($upload_dir['basedir']) . 'elementor/';
-
-    if (!file_exists($parent_dir)) {
-        wp_mkdir_p($parent_dir);
-    }
-
-    if (!file_exists($css_dir)) {
-        wp_mkdir_p($css_dir);
-    }
-
-    if (!is_writable($css_dir)) {
-        @chmod($css_dir, 0755);
-        @chmod($parent_dir, 0755);
-    }
-
-    return is_writable($css_dir);
-}
-
-add_action('init', 'wpb_ensure_elementor_css_dir');
-
-add_filter('option_elementor_css_print_method', function($value) {
-    if ($value === 'external') {
-        $upload_dir = wp_upload_dir();
-        if (!empty($upload_dir['basedir'])) {
-            $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-            if (!file_exists($css_dir) || !is_writable($css_dir)) {
-                return 'internal';
-            }
-        }
-    }
-    return $value;
-});
-
-add_action('admin_notices', function() {
-    if (!current_user_can('manage_options')) {
-        return;
-    }
-
-    $upload_dir = wp_upload_dir();
-    $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-    $css_url = trailingslashit($upload_dir['baseurl']) . 'elementor/css/';
-
-    $messages = [];
-
-    if (!file_exists($css_dir) || !is_writable($css_dir)) {
-        $messages[] = sprintf(
-            __('Elementor atomic styles directory is missing or not writable: %s', 'woocommerce-page-builder'),
-            '<code>' . esc_html($css_dir) . '</code>'
-        );
-    }
-
-    if (class_exists('\Elementor\Plugin')) {
-        $experiments = \Elementor\Plugin::$instance->experiments;
-        if ($experiments && method_exists($experiments, 'is_feature_active') && !$experiments->is_feature_active('e_atomic_elements')) {
-            $messages[] = __('Atomic Widgets experiment is not active. Go to Elementor > Settings > Experiments and enable it.', 'woocommerce-page-builder');
-        }
-    }
-
-    if (!empty($messages)) {
-        ?>
-        <div class="notice notice-error is-dismissible">
-            <p>
-                <strong><?php _e('WooCommerce Page Builder', 'woocommerce-page-builder'); ?></strong>:
-            </p>
-            <ul>
-                <?php foreach ($messages as $message): ?>
-                    <li><?php echo $message; ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php
-    }
-});
-
-function wpb_clear_elementor_atomic_cache() {
-    if (class_exists('\Elementor\Plugin')) {
-        $experiments = \Elementor\Plugin::$instance->experiments;
-        if ($experiments && method_exists($experiments, 'is_feature_active') && $experiments->is_feature_active('e_atomic_elements')) {
-            global $wpdb;
-            $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'elementor_atomic_cache_validity__%'" );
-        }
-    }
-}
-
-add_action('wp_enqueue_scripts', function() {
-    if (class_exists('\Elementor\Plugin')) {
-        $experiments = \Elementor\Plugin::$instance->experiments;
-        if ($experiments && method_exists($experiments, 'is_feature_active') && $experiments->is_feature_active('e_atomic_elements')) {
-            $upload_dir = wp_upload_dir();
-            if (!empty($upload_dir['basedir'])) {
-                $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-                $has_css_files = false;
-
-                if (file_exists($css_dir) && is_dir($css_dir)) {
-                    $files = glob(trailingslashit($css_dir) . '*.css');
-                    $has_css_files = !empty($files);
-                }
-
-                if (!$has_css_files) {
-                    wpb_clear_elementor_atomic_cache();
-                }
-            }
-        }
-    }
-}, 5);
-
-/**
- * Ensure Elementor scoped CSS (post-{id}-frontend-desktop.css) is enqueued
- * for WooCommerce Page Builder template pages before wp_head() fires.
- * Uses WooCommerce page type detection + wpb_get_active_template() to find
- * the active template post, then directly enqueues its Post CSS so the
- * <link> tag is printed in <head> before wp_head() outputs stylesheet links.
- */
-add_action('wp_enqueue_scripts', function() {
-    if (!class_exists('\Elementor\Plugin')) {
-        return;
-    }
-
-    $experiments = \Elementor\Plugin::$instance->experiments;
-    if (!$experiments || !method_exists($experiments, 'is_feature_active') || !$experiments->is_feature_active('e_atomic_elements')) {
-        return;
-    }
-
-    $upload_dir = wp_upload_dir();
-    if (empty($upload_dir['basedir'])) {
-        return;
-    }
-
-    $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-
-    if (!function_exists('is_woocommerce') || !is_woocommerce()) {
-        return;
-    }
-
-    $type = null;
-    if (is_product()) {
-        $type = 'product';
-    } elseif (is_shop()) {
-        $type = 'shop';
-    } elseif (is_cart()) {
-        $type = 'cart';
-    } elseif (is_checkout()) {
-        $type = 'checkout';
-    } elseif (is_account_page()) {
-        $type = 'myaccount';
-    } elseif (is_product_category()) {
-        $type = 'product-category';
-    } elseif (is_product_tag()) {
-        $type = 'product-tag';
-    }
-
-    if (!$type) {
-        $type = 'archive';
-    }
-
-    $active_template = wpb_get_active_template($type);
-    if (!$active_template && in_array($type, ['shop', 'product-category', 'product-tag'], true)) {
-        $active_template = wpb_get_active_template('archive');
-    }
-
-    if (!$active_template) {
-        return;
-    }
-
-    $template_id = (int) $active_template->ID;
-    if (!$template_id) {
-        return;
-    }
-
-    $has_template_css = false;
-    if (file_exists($css_dir) && is_dir($css_dir)) {
-        $files = glob(trailingslashit($css_dir) . 'local-' . $template_id . '-frontend-desktop.css');
-        $has_template_css = !empty($files);
-    }
-
-    if (!$has_template_css) {
-        global $wpdb;
-        $wpdb->query( $wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-            'elementor_atomic_cache_validity__local__' . $template_id . '__frontend%'
-        ) );
-    }
-
-    do_action('elementor/post/render', $template_id);
-    $document = \Elementor\Plugin::$instance->documents->get($template_id);
-    if ($document && $document->is_built_with_elementor()) {
-        $document->update_runtime_elements();
-        $css_file = \Elementor\Core\Files\CSS\Post::create($template_id);
-
-        if (method_exists($css_file, 'update')) {
-            $css_file->update();
-        }
-
-        $css_file->enqueue();
-    }
-}, 15);
-
-$rendered_post_ids = [];
-
-add_action('elementor/post/render', function($post_id) {
-    global $rendered_post_ids;
-    if ($post_id && is_int($post_id)) {
-        $rendered_post_ids[] = (int) $post_id;
-    }
-}, 5);
-
-add_action('elementor/frontend/after_enqueue_post_styles', function() {
-    global $rendered_post_ids;
-
-    if (empty($rendered_post_ids)) {
-        return;
-    }
-
-    if (!class_exists('\Elementor\Plugin')) {
-        return;
-    }
-
-    $upload_dir = wp_upload_dir();
-    if (empty($upload_dir['basedir'])) {
-        return;
-    }
-
-    $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
-    $post_ids = array_unique(array_filter($rendered_post_ids));
-
-    foreach ($post_ids as $post_id) {
-        try {
-            $atomic_css_file = trailingslashit($css_dir) . 'local-' . $post_id . '-frontend-desktop.css';
-
-            $document = \Elementor\Plugin::$instance->documents->get($post_id);
-            if (!$document || !$document->is_built_with_elementor()) {
-                continue;
-            }
-
-            $elements_data = $document->get_elements_data();
-            if (empty($elements_data)) {
-                continue;
-            }
-
-            $css_content = wpb_render_atomic_css($post_id, $elements_data);
-            if (empty($css_content)) {
-                continue;
-            }
-
-            if (file_exists($css_dir) || wp_mkdir_p($css_dir)) {
-                file_put_contents($atomic_css_file, $css_content);
-            }
-
-            if (!file_exists($atomic_css_file)) {
-                continue;
-            }
-
-            $css_url = trailingslashit($upload_dir['baseurl']) . 'elementor/css/' . basename($atomic_css_file);
-            $css_version = filemtime($atomic_css_file);
-
-            echo '<link rel="stylesheet" id="wpb-atomic-' . esc_attr($post_id) . '" href="' . esc_url($css_url) . '?ver=' . esc_attr($css_version) . '" media="all" />' . "\n";
-
-            echo '<style id="wpb-atomic-inline-' . esc_attr($post_id) . '">' . $css_content . '</style>' . "\n";
-
-            if (isset($_GET['wpb_debug_atomic']) && current_user_can('manage_options')) {
-                echo '<!-- WPB Atomic Debug: post_id=' . esc_html($post_id) .
-                     ' styles_count=' . count($styles) .
-                     ' css_length=' . strlen($css_content) . ' -->' . "\n";
-            }
-        } catch (\Throwable $e) {
-            error_log('WPB Atomic CSS Error (post ' . $post_id . '): ' . $e->getMessage());
-        }
-    }
-}, 999);
-
-function wpb_render_atomic_css($post_id, $elements_data) {
-    try {
-        $styles = wpb_extract_atomic_styles($elements_data);
-        if (empty($styles)) {
-            return '';
-        }
-
-        if (class_exists('\Elementor\Modules\AtomicWidgets\Styles\Styles_Renderer')) {
-            $breakpoints = \Elementor\Plugin::$instance->breakpoints->get_breakpoints_config();
-            $renderer = \Elementor\Modules\AtomicWidgets\Styles\Styles_Renderer::make(
-                $breakpoints,
-                '.elementor-' . $post_id
-            );
-            $css = $renderer->render($styles);
-            if (!empty($css)) {
-                return $css;
-            }
-        }
-    } catch (\Throwable $e) {
-        error_log('WPB Atomic CSS Render Error: ' . $e->getMessage());
-    }
-
-    return '';
-}
-
-function wpb_extract_atomic_styles($elements_data) {
-    $styles = [];
-    
-    if (empty($elements_data) || !is_array($elements_data)) {
-        return $styles;
-    }
-
-    foreach ($elements_data as $element_data) {
-        if (!is_array($element_data)) {
-            continue;
-        }
-
-        $element_styles = $element_data['styles'] ?? [];
-        if (empty($element_styles) && isset($element_data['settings']['styles'])) {
-            $element_styles = $element_data['settings']['styles'];
-        }
-        if (empty($element_styles) && isset($element_data['settings']['_css'])) {
-            $element_styles = $element_data['settings']['_css'];
-        }
-        
-        if (!empty($element_styles) && is_array($element_styles)) {
-            foreach ($element_styles as $style_def) {
-                if (is_array($style_def)) {
-                    if (isset($style_def['variants']) && !empty($style_def['variants'])) {
-                        $styles[] = $style_def;
-                    } elseif (isset($style_def['id']) && isset($style_def['type'])) {
-                        $styles[] = $style_def;
-                    }
-                }
-            }
-        }
-
-        if (isset($element_data['elements']) && is_array($element_data['elements'])) {
-            $styles = array_merge($styles, wpb_extract_atomic_styles($element_data['elements']));
-        }
-    }
-
-    return $styles;
-}
-
-/**
- * Get the watermark logo URL based on the selected source.
- */
+/**
+ * Get active template for a WooCommerce page type
+ */
+function wpb_get_active_template($type) {
+    $args = [
+        'post_type'   => 'wpb_template',
+        'post_status' => ['publish', 'draft'],
+        'meta_key'    => '_wpb_template_type',
+        'meta_value'  => $type,
+        'meta_query'  => [
+            [
+                'key'   => '_wpb_template_active',
+                'value' => '1',
+            ],
+        ],
+        'posts_per_page' => 1,
+    ];
+
+    $templates = get_posts($args);
+    return $templates ? $templates[0] : false;
+}
+
+/**
+ * Resolve the template assigned to the current WooCommerce request.
+ *
+ * This must be available before Elementor runs its frontend style pass so
+ * dynamic template documents can participate in Elementor's normal asset
+ * discovery and atomic CSS generation.
+ */
+function wpb_get_current_active_template() {
+    if (!function_exists('is_woocommerce')) {
+        return false;
+    }
+    $type = null;
+    if (is_product()) {
+        $type = 'product';
+    } elseif (is_product_category()) {
+        $type = 'product-category';
+    } elseif (is_product_tag()) {
+        $type = 'product-tag';
+    } elseif (is_shop()) {
+        $type = 'shop';
+    } elseif (is_cart()) {
+        $type = 'cart';
+    } elseif (is_checkout()) {
+        $type = 'checkout';
+    } elseif (is_account_page()) {
+        $type = 'myaccount';
+    }
+    if (!$type) {
+        return false;
+    }
+    $active_template = wpb_get_active_template($type);
+    if (!$active_template && in_array($type, ['shop', 'product-category', 'product-tag'], true)) {
+        $active_template = wpb_get_active_template('archive');
+    }
+    return $active_template;
+}
+
+/**
+ * Register the dynamic document before Elementor's frontend enqueue pass.
+ *
+ * Elementor 4 collects document IDs from `elementor/post/render`, then creates
+ * and enqueues local/global atomic CSS during
+ * `elementor/frontend/after_enqueue_post_styles`. Rendering the template after
+ * get_header() is too late because wp_head() and that style pass have already
+ * happened.
+ */
+function wpb_register_elementor_template_document() {
+    if (!class_exists('\Elementor\Plugin') || !\Elementor\Plugin::$instance->frontend) {
+        return;
+    }
+    $active_template = wpb_get_current_active_template();
+    if (!$active_template) {
+        return;
+    }
+    $template_id = (int) $active_template->ID;
+    $document = \Elementor\Plugin::$instance->documents->get($template_id);
+    if (!$document || !$document->is_built_with_elementor()) {
+        return;
+    }
+    // Discover conditional widget assets before Elementor enqueues them.
+    $document->update_runtime_elements();
+    // Let Elementor (including its v4 atomic-style manager) own CSS generation.
+    do_action('elementor/post/render', $template_id);
+    global $wpb_elementor_template_id;
+    $wpb_elementor_template_id = $template_id;
+}
+
+add_action('wp_enqueue_scripts', 'wpb_register_elementor_template_document', 1);
+
+/**
+ * Run Elementor's normal style pass after it registers stylesheet handles at
+ * priority 5. WooCommerce endpoints usually are not Elementor documents, so
+ * Elementor does not schedule this pass by itself for these requests.
+ */
+function wpb_enqueue_elementor_template_styles() {
+    global $wpb_elementor_template_id;
+    if (empty($wpb_elementor_template_id) || !class_exists('\Elementor\Plugin')) {
+        return;
+    }
+    \Elementor\Plugin::$instance->frontend->enqueue_styles();
+    // Keep legacy/v3 post CSS working on mixed Elementor documents.
+    \Elementor\Core\Files\CSS\Post::create((int) $wpb_elementor_template_id)->enqueue();
+}
+
+add_action('wp_enqueue_scripts', 'wpb_enqueue_elementor_template_styles', 6);
+
+/**
+ * Override WooCommerce templates
+ */
+add_filter('template_include', function($template) {
+    $active_template = wpb_get_current_active_template();
+    if (!$active_template) {
+        return $template;
+    }
+    global $wpb_active_template;
+    $wpb_active_template = $active_template;
+    return WPB_PLUGIN_PATH . 'templates/override.php';
+}, 9999);
+
+/**
+ * Get the watermark logo URL based on the selected source.
+ */
 function wpb_get_watermark_logo() {
     $source = get_option('wpb_watermark_logo_source', 'custom');
 

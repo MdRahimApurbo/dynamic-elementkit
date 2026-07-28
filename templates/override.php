@@ -12,14 +12,6 @@ if ($wpb_active_template && isset($wpb_active_template->post_content)) {
         }
         return $classes;
     });
-
-    $template_id = (int) $wpb_active_template->ID;
-    add_action('wp_head', function() use ($template_id) {
-        if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->frontend) {
-            $post_css = \Elementor\Core\Files\CSS\Post::create($template_id);
-            $post_css->enqueue();
-        }
-    }, 1);
 }
 
 get_header();
@@ -31,7 +23,7 @@ if ($wpb_active_template && isset($wpb_active_template->post_content)) {
         if ($template_post) {
             setup_postdata($template_post);
         }
-        echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($template_id, true);
+        echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($template_id);
         if ($template_post) {
             wp_reset_postdata();
         }
