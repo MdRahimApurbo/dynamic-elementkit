@@ -1,0 +1,28 @@
+/* Local minimal Embla dots theme */
+.wpb-product-media.embla .embla__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0 4px;
+    flex-wrap: wrap;
+}
+
+.wpb-product-media.embla .embla__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dcdcde;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.wpb-product-media.embla .embla__dot:hover {
+    background: #b0b0b0;
+}
+
+.wpb-product-media.embla .embla__dot--selected {
+    background: #2271b1;
+    transform: scale(1.3);
+}

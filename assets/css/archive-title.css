@@ -1,0 +1,25 @@
+.wpb-archive-title-wrapper {
+    margin-bottom: 20px;
+}
+
+.wpb-archive-title {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.wpb-breadcrumb {
+    font-size: 0.875em;
+    margin-top: 8px;
+}
+
+.wpb-breadcrumb a {
+    text-decoration: none;
+}
+
+.wpb-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.wpb-breadcrumb .separator {
+    margin: 0 5px;
+}

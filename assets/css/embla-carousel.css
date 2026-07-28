@@ -1,0 +1,29 @@
+/* Local minimal Embla base styles for product media */
+.wpb-product-media.embla {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+.wpb-product-media.embla .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+}
+
+.wpb-product-media.embla .embla__container {
+    display: flex;
+    width: 100%;
+}
+
+.wpb-product-media.embla .embla__slide {
+    position: relative;
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
+.wpb-product-media.embla .embla__slide img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}

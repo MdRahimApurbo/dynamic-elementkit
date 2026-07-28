@@ -1,0 +1,173 @@
+/* WooCommerce Page Builder Admin Styles */
+
+/* Toggle Switch */
+.wpb-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.wpb-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wpb-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.wpb-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+input:checked + .wpb-slider {
+    background-color: #2271b1;
+}
+
+input:checked + .wpb-slider:before {
+    transform: translateX(24px);
+}
+
+.wpb-slider.round {
+    border-radius: 26px;
+}
+
+.wpb-slider.round:before {
+    border-radius: 50%;
+}
+
+.wpb-toggle-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+/* Modal */
+.wpb-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wpb-modal {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 500px;
+    margin: 20px;
+}
+
+.wpb-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.wpb-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.wpb-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wpb-modal-close:hover {
+    color: #000;
+}
+
+.wpb-modal-body {
+    padding: 24px;
+}
+
+.wpb-modal-body .form-table {
+    margin-top: 0;
+}
+
+.wpb-modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid #ccd0d4;
+}
+
+/* Table */
+.wpb-templates-table th#active,
+.wpb-templates-table td.column-active {
+    width: 100px;
+}
+
+.wpb-templates-table th#type,
+.wpb-templates-table td.column-type {
+    width: 180px;
+}
+
+.wpb-templates-table th#date,
+.wpb-templates-table td.column-date {
+    width: 140px;
+}
+
+/* Wrap */
+.wrap.wpb-wrap {
+    width: 100%;
+    max-width: none;
+    margin: 20px 0 0 0;
+    padding: 0;
+}
+
+.wrap.wpb-wrap .wp-list-table {
+    width: 100%;
+}
+
+.wrap.wpb-wrap .tablenav.top {
+    width: 100%;
+}
+
+/* Elementor Edit Button */
+.row-actions .edit_elementor a {
+    color: #2271b1;
+}
+
+.row-actions .edit_elementor a:hover {
+    color: #135e96;
+}

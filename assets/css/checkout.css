@@ -1,0 +1,485 @@
+/* WooCommerce Page Builder - Quick Checkout Widget */
+
+.wpb-checkout-form {
+    display: block;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, sans-serif;
+}
+
+.wpb-checkout-form .wpb-checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.wpb-checkout-form .wpb-checkout-form-section,
+.wpb-checkout-form .wpb-checkout-review-section {
+    background: #ffffff;
+    padding: 24px;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.wpb-checkout-form .wpb-checkout-form-section h3,
+.wpb-checkout-form .wpb-order-review h3,
+.wpb-checkout-form .wpb-payment-methods h3 {
+    margin: 0 0 18px 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-input-wrap {
+    position: relative;
+}
+
+.wpb-checkout-form .wpb-form-field .wpb-input-wrap .wpb-field-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #8c8f94;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.wpb-checkout-form .wpb-form-field input,
+.wpb-checkout-form .wpb-form-field textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #8c8f94;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background: #ffffff;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-form-field input {
+    padding-left: 40px;
+}
+
+.wpb-checkout-form .wpb-form-field input:focus,
+.wpb-checkout-form .wpb-form-field textarea:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.wpb-checkout-form .wpb-form-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.wpb-checkout-form .wpb-checkout-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    background: #2271b1;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease;
+    letter-spacing: 0.02em;
+}
+
+.wpb-checkout-form .wpb-checkout-submit:hover {
+    background: #135e96;
+}
+
+.wpb-checkout-form .wpb-checkout-submit:active {
+    transform: scale(0.98);
+}
+
+.wpb-checkout-form .wpb-checkout-submit:disabled,
+.wpb-checkout-form .wpb-checkout-submit.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.wpb-checkout-form .wpb-checkout-submit .spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: wpb-spin 0.6s linear infinite;
+    margin-right: 8px;
+}
+
+.wpb-checkout-form .wpb-checkout-submit.loading .spinner {
+    display: inline-block;
+}
+
+.wpb-checkout-form .wpb-checkout-submit.loading .btn-text {
+    display: none;
+}
+
+@keyframes wpb-spin {
+    to { transform: rotate(360deg); }
+}
+
+.wpb-checkout-form .wpb-checkout-message {
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+}
+
+.wpb-checkout-form .wpb-checkout-message.success {
+    background: #edfaef;
+    color: #0d6b2e;
+    border: 1px solid #b7deb5;
+}
+
+.wpb-checkout-form .wpb-checkout-message.error {
+    background: #fef2f1;
+    color: #b32d2e;
+    border: 1px solid #f5c6cb;
+}
+
+/* Order Review Section */
+.wpb-checkout-form .wpb-order-review {
+    margin-bottom: 16px;
+}
+
+.wpb-checkout-form .wpb-cart-items {
+    margin-bottom: 16px;
+}
+
+.wpb-checkout-form .wpb-cart-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e8eaed;
+    align-items: flex-start;
+}
+
+.wpb-checkout-form .wpb-cart-item:last-child {
+    border-bottom: none;
+}
+
+.wpb-checkout-form .wpb-cart-item-image {
+    width: 64px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f0f0f1;
+}
+
+.wpb-checkout-form .wpb-cart-item-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.wpb-checkout-form .wpb-cart-item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.wpb-checkout-form .wpb-cart-item-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1d2327;
+    line-height: 1.4;
+}
+
+.wpb-checkout-form .wpb-cart-item-price {
+    color: #2271b1;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.wpb-checkout-form .wpb-quantity-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 8px;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    overflow: hidden;
+    width: auto;
+    align-self: flex-start;
+}
+
+.wpb-checkout-form .wpb-qty-minus,
+.wpb-checkout-form .wpb-qty-plus {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f6f7f7;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #1d2327;
+    transition: background-color 0.15s ease;
+}
+
+.wpb-checkout-form .wpb-qty-minus:hover,
+.wpb-checkout-form .wpb-qty-plus:hover {
+    background: #e0e0e0;
+}
+
+.wpb-checkout-form .wpb-qty-minus {
+    border-right: 1px solid #dcdcde;
+}
+
+.wpb-checkout-form .wpb-qty-plus {
+    border-left: 1px solid #dcdcde;
+}
+
+.wpb-checkout-form .wpb-qty-input {
+    width: 50px;
+    height: 32px;
+    border: none;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    -moz-appearance: textfield;
+    background: #ffffff;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-qty-input::-webkit-inner-spin-button,
+.wpb-checkout-form .wpb-qty-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.wpb-checkout-form .wpb-cart-totals {
+    border-top: 2px solid #e8eaed;
+    padding-top: 14px;
+    margin-top: 14px;
+}
+
+.wpb-checkout-form .wpb-cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-cart-total:last-child {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 0;
+    padding-top: 8px;
+    color: #1d2327;
+}
+
+/* Payment Options Cards */
+.wpb-checkout-form .wpb-payment-methods {
+    margin-bottom: 18px;
+}
+
+.wpb-checkout-form .wpb-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wpb-checkout-form .wpb-payment-option {
+    position: relative;
+    border: 2px solid #dcdcde;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    background: #ffffff;
+}
+
+.wpb-checkout-form .wpb-payment-option:hover {
+    border-color: #2271b1;
+    background: #f7f9fc;
+}
+
+.wpb-checkout-form .wpb-payment-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.wpb-checkout-form .wpb-payment-option input[type="radio"]:checked + .wpb-payment-option-label {
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-payment-option-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    padding-left: 36px;
+    position: relative;
+}
+
+.wpb-checkout-form .wpb-payment-option-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #8c8f94;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.wpb-checkout-form .wpb-payment-option input[type="radio"]:checked + .wpb-payment-option-label::before {
+    border-color: #2271b1;
+    background: #2271b1;
+    box-shadow: inset 0 0 0 4px #ffffff;
+}
+
+.wpb-checkout-form .wpb-payment-option-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-payment-option-content {
+    max-height: 0;
+    overflow-y: hidden;
+    opacity: 0;
+    padding-top: 0;
+    margin-top: 0;
+    border-top: 1px solid transparent;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding-top 0.3s ease, margin-top 0.3s ease, border-color 0.3s ease;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .wpb-payment-option-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    display: block;
+}
+
+.wpb-checkout-form .wpb-payment-option input[type="radio"]:checked + .wpb-payment-option-label + .wpb-payment-option-content {
+    max-height: 3000px;
+    overflow-y: visible;
+    opacity: 1;
+    padding-top: 14px;
+    margin-top: 10px;
+    border-top-color: #e8eaed;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-total-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1d2327;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: #fff8f0;
+    border: 1px solid #f0dca0;
+    border-radius: 6px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-available-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-s__acc {
+    border: 1px solid #e8eaed;
+    border-radius: 6px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-acc__qr-code {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-acc__qr-code img {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 4px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-acc_d p {
+    margin: 4px 0;
+    font-size: 13px;
+    color: #4a4a4a;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-user__field {
+    margin-bottom: 10px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-user__field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 4px;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-user__field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #dcdcde;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background: #ffffff;
+    color: #1d2327;
+}
+
+.wpb-checkout-form .wpb-payment-option-content .bdpg-user__field input:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wpb-checkout-form .wpb-checkout-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .wpb-checkout-form .wpb-checkout-form-section,
+    .wpb-checkout-form .wpb-checkout-review-section {
+        padding: 18px;
+    }
+
+    .wpb-checkout-form .wpb-cart-item-image {
+        width: 48px;
+    }
+
+    .wpb-checkout-form .wpb-checkout-submit {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+}
