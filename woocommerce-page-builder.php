@@ -852,9 +852,13 @@ function wpb_register_elementor_template_document() {
 add_action('wp_enqueue_scripts', 'wpb_register_elementor_template_document', 1);
 
 /**
- * Run Elementor's normal style pass after it registers stylesheet handles at
- * priority 5. WooCommerce endpoints usually are not Elementor documents, so
- * Elementor does not schedule this pass by itself for these requests.
+ * Run Elementor's normal style pass after all other integrations have had a
+ * chance to register their documents. Header/footer and Theme Builder plugins
+ * commonly register template IDs later in `wp_enqueue_scripts`; calling
+ * Elementor's one-shot style pass before them drops their generated CSS.
+ *
+ * WooCommerce endpoints usually are not Elementor documents, so Elementor does
+ * not schedule this pass by itself for these requests.
  */
 function wpb_enqueue_elementor_template_styles() {
     global $wpb_elementor_template_id;
@@ -866,7 +870,7 @@ function wpb_enqueue_elementor_template_styles() {
     \Elementor\Core\Files\CSS\Post::create((int) $wpb_elementor_template_id)->enqueue();
 }
 
-add_action('wp_enqueue_scripts', 'wpb_enqueue_elementor_template_styles', 6);
+add_action('wp_enqueue_scripts', 'wpb_enqueue_elementor_template_styles', PHP_INT_MAX);
 
 /**
  * Override WooCommerce templates
