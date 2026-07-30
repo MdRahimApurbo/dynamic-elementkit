@@ -139,6 +139,7 @@ class WPB_Template_List_Table extends WP_List_Table {
             'shop'             => __('Shop', 'woocommerce-page-builder'),
             'cart'             => __('Cart', 'woocommerce-page-builder'),
             'checkout'         => __('Checkout', 'woocommerce-page-builder'),
+            'thankyou'         => __('Thank You', 'woocommerce-page-builder'),
             'myaccount'        => __('My Account', 'woocommerce-page-builder'),
             'product'          => __('Single Product', 'woocommerce-page-builder'),
             'product-category' => __('Product Category', 'woocommerce-page-builder'),

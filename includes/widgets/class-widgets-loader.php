@@ -55,13 +55,35 @@ class WPB_Elementor_Widgets {
         if (class_exists('WPB_Cart_Widget')) {
             $widgets_manager->register(new WPB_Cart_Widget());
         }
+        require_once WPB_PLUGIN_PATH . 'includes/widgets/class-sidebar-menu.php';
+        if (class_exists('WPB_Sidebar_Menu_Widget')) {
+            $widgets_manager->register(new WPB_Sidebar_Menu_Widget());
+        }
         require_once WPB_PLUGIN_PATH . 'includes/widgets/class-checkout-form.php';
         if (class_exists('WPB_Checkout_Form_Widget')) {
             $widgets_manager->register(new WPB_Checkout_Form_Widget());
         }
+        require_once WPB_PLUGIN_PATH . 'includes/widgets/class-thank-you.php';
+        if (class_exists('WPB_Thank_You_Widget')) {
+            $widgets_manager->register(new WPB_Thank_You_Widget());
+        }
         require_once WPB_PLUGIN_PATH . 'includes/widgets/class-product-media.php';
         if (class_exists('WPB_Product_Media_Widget')) {
             $widgets_manager->register(new WPB_Product_Media_Widget());
+        }
+        require_once WPB_PLUGIN_PATH . 'includes/widgets/class-single-product-elements.php';
+        foreach ([
+            'WPB_Product_Title_Widget',
+            'WPB_Product_Price_Widget',
+            'WPB_Product_Rating_Widget',
+            'WPB_Product_Short_Description_Widget',
+            'WPB_Product_Add_To_Cart_Widget',
+            'WPB_Product_Meta_Widget',
+            'WPB_Product_Tabs_Widget',
+        ] as $widget_class) {
+            if (class_exists($widget_class)) {
+                $widgets_manager->register(new $widget_class());
+            }
         }
     }
 }

@@ -141,6 +141,8 @@ class WPB_Price_Range_Widget extends \Elementor\Widget_Base {
         $price_range = $this->get_price_range();
         $min_val = isset($price_range['min']) ? floatval($price_range['min']) : 0;
         $max_val = isset($price_range['max']) ? floatval($price_range['max']) : 1000;
+        $step = max(1, round(($max_val - $min_val) / 100, 2));
+        $currency_symbol = function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '';
         ?>
         <div class="wpb-price-range-filter" data-connect-id="<?php echo esc_attr($connect_id); ?>" data-filter-id="<?php echo esc_attr($filter_id); ?>" data-input-type="<?php echo esc_attr($input_type); ?>" data-auto-filter="<?php echo esc_attr($auto_filter); ?>" data-min-val="<?php echo esc_attr($min_val); ?>" data-max-val="<?php echo esc_attr($max_val); ?>">
             <?php if ($input_type === 'inputs'): ?>
@@ -150,22 +152,27 @@ class WPB_Price_Range_Widget extends \Elementor\Widget_Base {
                     <input type="number" class="wpb-price-max" placeholder="<?php echo esc_attr($max_price_placeholder); ?>" min="0" step="any">
                 </div>
             <?php else: ?>
-                <div class="wpb-price-range-slider" data-min="<?php echo esc_attr($min_val); ?>" data-max="<?php echo esc_attr($max_val); ?>">
+                <div class="wpb-price-range-slider" data-min="<?php echo esc_attr($min_val); ?>" data-max="<?php echo esc_attr($max_val); ?>" data-step="<?php echo esc_attr($step); ?>" data-currency="<?php echo esc_attr($currency_symbol); ?>">
                     <div class="wpb-slider-labels">
                         <span class="wpb-slider-min-label"><?php echo esc_html($slider_min_label); ?></span>
                         <span class="wpb-slider-max-label"><?php echo esc_html($slider_max_label); ?></span>
                     </div>
-                    <div class="wpb-slider-track"></div>
-                    <div class="wpb-slider-range"></div>
-                    <div class="wpb-slider-handle wpb-slider-min-handle" data-index="min"></div>
-                    <div class="wpb-slider-handle wpb-slider-max-handle" data-index="max"></div>
+                    <div class="wpb-slider-control">
+                        <div class="wpb-slider-track"></div>
+                        <div class="wpb-slider-range"></div>
+                        <input type="range" class="wpb-price-range-min" min="<?php echo esc_attr($min_val); ?>" max="<?php echo esc_attr($max_val); ?>" step="<?php echo esc_attr($step); ?>" value="<?php echo esc_attr($min_val); ?>" aria-label="<?php esc_attr_e('Minimum price', 'woocommerce-page-builder'); ?>">
+                        <input type="range" class="wpb-price-range-max" min="<?php echo esc_attr($min_val); ?>" max="<?php echo esc_attr($max_val); ?>" step="<?php echo esc_attr($step); ?>" value="<?php echo esc_attr($max_val); ?>" aria-label="<?php esc_attr_e('Maximum price', 'woocommerce-page-builder'); ?>">
+                    </div>
                     <div class="wpb-slider-values">
-                        <span class="wpb-slider-min-value"></span>
-                        <span class="wpb-slider-max-value"></span>
+                        <output class="wpb-slider-min-value"></output>
+                        <output class="wpb-slider-max-value"></output>
                     </div>
                 </div>
                 <input type="hidden" class="wpb-price-min" value="<?php echo esc_attr($min_val); ?>">
                 <input type="hidden" class="wpb-price-max" value="<?php echo esc_attr($max_val); ?>">
+            <?php endif; ?>
+            <?php if ($auto_filter !== 'yes'): ?>
+                <button type="button" class="wpb-price-filter-button"><?php esc_html_e('Apply price filter', 'woocommerce-page-builder'); ?></button>
             <?php endif; ?>
         </div>
         <?php

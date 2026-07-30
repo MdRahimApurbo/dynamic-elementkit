@@ -20,6 +20,24 @@ class Module extends Dynamic_Tags_Module {
 		return array(
 			'Tags\Product_Title_Tag',
 			'Tags\Product_Description_Tag',
+			'Tags\Product_ID_Tag',
+			'Tags\Product_SKU_Tag',
+			'Tags\Product_Short_Description_Tag',
+			'Tags\Product_Price_Tag',
+			'Tags\Product_Regular_Price_Tag',
+			'Tags\Product_Sale_Price_Tag',
+			'Tags\Product_Sale_Percentage_Tag',
+			'Tags\Product_Stock_Status_Tag',
+			'Tags\Product_Stock_Quantity_Tag',
+			'Tags\Product_Type_Tag',
+			'Tags\Product_Weight_Tag',
+			'Tags\Product_Dimensions_Tag',
+			'Tags\Product_Categories_Tag',
+			'Tags\Product_Tags_Tag',
+			'Tags\Product_Rating_Tag',
+			'Tags\Product_Review_Count_Tag',
+			'Tags\Product_URL_Tag',
+			'Tags\Product_Image_Tag',
 		);
 	}
 
@@ -32,6 +50,7 @@ class Module extends Dynamic_Tags_Module {
 	}
 
 	public function register_tags( $dynamic_tags ) {
+		require_once __DIR__ . '/tags/product-data-tags.php';
 		require_once __DIR__ . '/tags/product-title-tag.php';
 		require_once __DIR__ . '/tags/product-description-tag.php';
 

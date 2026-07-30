@@ -110,6 +110,31 @@ class WPB_Category_Filter_Widget extends \Elementor\Widget_Base {
         );
 
         $this->add_control(
+            'orientation',
+            [
+                'label' => __('Orientation', 'woocommerce-page-builder'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'horizontal',
+                'options' => [
+                    'horizontal' => __('Horizontal', 'woocommerce-page-builder'),
+                    'vertical' => __('Vertical', 'woocommerce-page-builder'),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'show_count',
+            [
+                'label' => __('Show Product Count', 'woocommerce-page-builder'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'woocommerce-page-builder'),
+                'label_off' => __('No', 'woocommerce-page-builder'),
+                'return_value' => 'yes',
+                'default' => 'no',
+            ]
+        );
+
+        $this->add_control(
             'restrict_to_current',
             [
                 'label' => __('Restrict to Current Category', 'woocommerce-page-builder'),
@@ -131,6 +156,8 @@ class WPB_Category_Filter_Widget extends \Elementor\Widget_Base {
         $css_id = !empty($settings['_element_id']) ? sanitize_text_field($settings['_element_id']) : '';
         $filter_id = $connect_id ? $connect_id : ($css_id ? $css_id : $this->get_id());
         $filter_mode = !empty($settings['filter_mode']) ? sanitize_text_field($settings['filter_mode']) : 'single';
+        $orientation = in_array(($settings['orientation'] ?? ''), ['horizontal', 'vertical'], true) ? $settings['orientation'] : 'horizontal';
+        $show_count = ($settings['show_count'] ?? 'no') === 'yes';
 
         $categories = !empty($settings['categories']) ? $settings['categories'] : [];
         if (empty($categories)) {
@@ -164,10 +191,10 @@ class WPB_Category_Filter_Widget extends \Elementor\Widget_Base {
             }
         }
         ?>
-        <div class="wpb-category-filter style-<?php echo esc_attr($settings['filter_style']); ?>" data-widget-id="<?php echo esc_attr($filter_id); ?>" data-connect-id="<?php echo esc_attr($connect_id); ?>" data-filter-mode="<?php echo esc_attr($filter_mode); ?>" <?php if ($current_category_slug): ?>data-current-category="<?php echo esc_attr($current_category_slug); ?>"<?php endif; ?>>
+        <div class="wpb-category-filter style-<?php echo esc_attr($settings['filter_style']); ?> orientation-<?php echo esc_attr($orientation); ?> mode-<?php echo esc_attr($filter_mode); ?>" data-widget-id="<?php echo esc_attr($filter_id); ?>" data-connect-id="<?php echo esc_attr($connect_id); ?>" data-filter-mode="<?php echo esc_attr($filter_mode); ?>" data-orientation="<?php echo esc_attr($orientation); ?>" <?php if ($current_category_slug): ?>data-current-category="<?php echo esc_attr($current_category_slug); ?>"<?php endif; ?>>
             <?php if ($settings['show_all'] === 'yes' && $filter_mode === 'single'): ?>
-                <button class="wpb-filter-button <?php echo $current_category_id ? '' : 'active'; ?>" data-category-id="<?php echo esc_attr($current_category_id); ?>" data-category-slug="<?php echo esc_attr($current_category_slug); ?>">
-                    <?php echo esc_html($settings['all_label']); ?>
+                <button type="button" class="wpb-filter-button <?php echo $current_category_id ? '' : 'active'; ?>" data-category-id="<?php echo esc_attr($current_category_id); ?>" data-category-slug="<?php echo esc_attr($current_category_slug); ?>">
+                    <span><?php echo esc_html($settings['all_label']); ?></span>
                 </button>
             <?php endif; ?>
             <div class="wpb-filter-items">
@@ -178,11 +205,14 @@ class WPB_Category_Filter_Widget extends \Elementor\Widget_Base {
                     <?php if ($filter_mode === 'multiple'): ?>
                         <label class="wpb-filter-checkbox">
                             <input type="checkbox" class="wpb-filter-checkbox-input" value="<?php echo esc_attr($cat->slug); ?>">
+                            <span class="wpb-filter-checkbox-box" aria-hidden="true"></span>
                             <span class="wpb-filter-checkbox-label"><?php echo esc_html($cat->name); ?></span>
+                            <?php if ($show_count): ?><span class="wpb-filter-count"><?php echo esc_html($cat->count); ?></span><?php endif; ?>
                         </label>
                     <?php else: ?>
-                        <button class="wpb-filter-button" data-category-id="<?php echo esc_attr($cat->term_id); ?>" data-category-slug="<?php echo esc_attr($cat->slug); ?>">
-                            <?php echo esc_html($cat->name); ?>
+                        <button type="button" class="wpb-filter-button" data-category-id="<?php echo esc_attr($cat->term_id); ?>" data-category-slug="<?php echo esc_attr($cat->slug); ?>">
+                            <span><?php echo esc_html($cat->name); ?></span>
+                            <?php if ($show_count): ?><span class="wpb-filter-count"><?php echo esc_html($cat->count); ?></span><?php endif; ?>
                         </button>
                     <?php endif; ?>
                 <?php endforeach; ?>

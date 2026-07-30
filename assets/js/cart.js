@@ -8,7 +8,12 @@ jQuery(document).ready(function($) {
 
         $.post(ajaxUrl, {
             action: 'wpb_get_cart_fragments',
-            _wpnonce: nonce
+            _wpnonce: nonce,
+            empty_text: $cart.data('empty-text') || '',
+            continue_text: $cart.data('continue-text') || '',
+            subtotal_text: $cart.data('subtotal-text') || '',
+            shipping_text: $cart.data('shipping-text') || '',
+            checkout_text: $cart.data('checkout-text') || ''
         })
         .done(function(response) {
             if (response.success && response.data) {
@@ -135,8 +140,7 @@ jQuery(document).ready(function($) {
     $(document).ajaxComplete(function(event, xhr, settings) {
         if (settings && settings.data && typeof settings.data === 'string' &&
             (settings.data.indexOf('wpb_add_to_cart') !== -1 ||
-             settings.data.indexOf('wpb_update_cart_quantity') !== -1 ||
-             settings.data.indexOf('wpb_quick_checkout') !== -1)) {
+             settings.data.indexOf('wpb_update_cart_quantity') !== -1)) {
             $('.wpb-cart').each(function() {
                 refreshCart($(this));
             });

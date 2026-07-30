@@ -266,9 +266,10 @@ class WPB_Product_Search_Widget extends \Elementor\Widget_Base {
              data-show-price="<?php echo esc_attr($show_price); ?>"
              data-show-no-result="<?php echo esc_attr($show_no_result); ?>"
              data-no-result-text="<?php echo esc_attr($no_result_text); ?>"
-             data-connect-id="<?php echo esc_attr($connect_id); ?>">
+            data-connect-id="<?php echo esc_attr($connect_id); ?>">
             <form class="wpb-product-search-form" action="<?php echo esc_url(home_url('/')); ?>" method="get" role="search">
-                <input type="search" class="wpb-product-search-input" name="s" autocomplete="off" placeholder="<?php echo esc_attr($placeholder); ?>" />
+                <label class="screen-reader-text" for="wpb-product-search-<?php echo esc_attr($this->get_id()); ?>"><?php esc_html_e('Search products', 'woocommerce-page-builder'); ?></label>
+                <input id="wpb-product-search-<?php echo esc_attr($this->get_id()); ?>" type="search" class="wpb-product-search-input" name="s" autocomplete="off" placeholder="<?php echo esc_attr($placeholder); ?>" aria-autocomplete="list" />
                 <input type="hidden" name="post_type" value="product" />
                 <span class="wpb-product-search-loading" aria-hidden="true"></span>
             </form>

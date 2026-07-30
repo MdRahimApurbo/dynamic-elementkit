@@ -147,7 +147,11 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             show_badge: settings.show_badge || 'no',
             badge_text: settings.badge_text || 'Sale',
             auto_sale_badge: settings.auto_sale_badge || 'no',
-            show_discount_percentage: settings.show_discount_percentage || 'no'
+            show_discount_percentage: settings.show_discount_percentage || 'no',
+            button_full_width: settings.button_full_width || 'no',
+            button_text: settings.button_text || 'Add to Cart',
+            variable_button_text: settings.variable_button_text || 'Select options',
+            added_button_text: settings.added_button_text || ''
         })
         .done(function(response) {
             $productsContainer.removeClass('wpb-loading');
@@ -196,14 +200,6 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             $filterContainer.data('priceTimeout', setTimeout(function() {
                 triggerPriceFilter($filterContainer);
             }, 400));
-        }
-    });
-
-    $(document).on('mouseenter', '.wpb-price-range-slider', function() {
-        var $slider = $(this);
-        if (!$slider.data('initialized')) {
-            $slider.data('initialized', true);
-            initPriceSlider($slider);
         }
     });
 
@@ -285,6 +281,7 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             badge_text: settings.badge_text || 'Sale',
             auto_sale_badge: settings.auto_sale_badge || 'no',
             show_discount_percentage: settings.show_discount_percentage || 'no',
+            button_full_width: settings.button_full_width || 'no',
             button_text: settings.button_text || 'Add to Cart',
             variable_button_text: settings.variable_button_text || 'Select options',
             added_button_text: settings.added_button_text || ''
@@ -300,103 +297,84 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
         });
     }
 
-    function initPriceSlider($slider) {
+    function updatePriceSlider($slider, changedHandle) {
         var $filterContainer = $slider.closest('.wpb-price-range-filter');
         var minVal = parseFloat($slider.data('min')) || 0;
         var maxVal = parseFloat($slider.data('max')) || 1000;
-        var $minHandle = $slider.find('.wpb-slider-min-handle');
-        var $maxHandle = $slider.find('.wpb-slider-max-handle');
+        var step = parseFloat($slider.data('step')) || 1;
+        var $minRange = $slider.find('.wpb-price-range-min');
+        var $maxRange = $slider.find('.wpb-price-range-max');
         var $range = $slider.find('.wpb-slider-range');
         var $minValue = $filterContainer.find('.wpb-slider-min-value');
         var $maxValue = $filterContainer.find('.wpb-slider-max-value');
         var $minInput = $filterContainer.find('.wpb-price-min');
         var $maxInput = $filterContainer.find('.wpb-price-max');
+        var currency = $slider.data('currency') || '';
+        var currentMin = parseFloat($minRange.val());
+        var currentMax = parseFloat($maxRange.val());
 
-        var currentMin = parseFloat($minInput.val()) || minVal;
-        var currentMax = parseFloat($maxInput.val()) || maxVal;
-
-        function updateSlider() {
-            var minPercent = ((currentMin - minVal) / (maxVal - minVal)) * 100;
-            var maxPercent = ((currentMax - minVal) / (maxVal - minVal)) * 100;
-            $minHandle.css('left', minPercent + '%');
-            $maxHandle.css('left', maxPercent + '%');
-            $range.css('left', minPercent + '%').css('right', (100 - maxPercent) + '%');
-            if ($minValue.length) $minValue.text(Math.round(currentMin));
-            if ($maxValue.length) $maxValue.text(Math.round(currentMax));
-            $minInput.val(currentMin);
-            $maxInput.val(currentMax);
+        if (changedHandle === 'min' && currentMin > currentMax - step) {
+            currentMin = currentMax - step;
+            $minRange.val(currentMin);
+        } else if (changedHandle === 'max' && currentMax < currentMin + step) {
+            currentMax = currentMin + step;
+            $maxRange.val(currentMax);
         }
 
-        function triggerFromSlider() {
-            var autoFilter = $filterContainer.attr('data-auto-filter') === 'yes';
-            if (autoFilter) {
-                clearTimeout($filterContainer.data('priceTimeout'));
-                $filterContainer.data('priceTimeout', setTimeout(function() {
-                    triggerPriceFilter($filterContainer);
-                }, 300));
-            }
-        }
+        currentMin = Math.max(minVal, currentMin);
+        currentMax = Math.min(maxVal, currentMax);
+        var span = Math.max(1, maxVal - minVal);
+        var minPercent = ((currentMin - minVal) / span) * 100;
+        var maxPercent = ((currentMax - minVal) / span) * 100;
 
-        $minHandle.on('mousedown touchstart', function(e) {
-            e.preventDefault();
-            $minHandle.addClass('wpb-active');
-            $maxHandle.removeClass('wpb-active');
-
-            function onMove(e) {
-                var clientX = e.type === 'touchmove' ? e.originalEvent.touches[0].clientX : e.clientX;
-                var rect = $slider[0].getBoundingClientRect();
-                var percent = (clientX - rect.left) / rect.width;
-                percent = Math.max(0, Math.min(1, percent));
-                currentMin = minVal + percent * (maxVal - minVal);
-                currentMin = Math.max(minVal, Math.min(currentMin, currentMax - 1));
-                updateSlider();
-            }
-
-            function onUp() {
-                $minHandle.removeClass('wpb-active');
-                $(document).off('mousemove touchmove', onMove);
-                $(document).off('mouseup touchend', onUp);
-                triggerFromSlider();
-            }
-
-            $(document).on('mousemove touchmove', onMove);
-            $(document).on('mouseup touchend', onUp);
-        });
-
-        $maxHandle.on('mousedown touchstart', function(e) {
-            e.preventDefault();
-            $maxHandle.addClass('wpb-active');
-            $minHandle.removeClass('wpb-active');
-
-            function onMove(e) {
-                var clientX = e.type === 'touchmove' ? e.originalEvent.touches[0].clientX : e.clientX;
-                var rect = $slider[0].getBoundingClientRect();
-                var percent = (clientX - rect.left) / rect.width;
-                percent = Math.max(0, Math.min(1, percent));
-                currentMax = minVal + percent * (maxVal - minVal);
-                currentMax = Math.min(maxVal, Math.max(currentMax, currentMin + 1));
-                updateSlider();
-            }
-
-            function onUp() {
-                $maxHandle.removeClass('wpb-active');
-                $(document).off('mousemove touchmove', onMove);
-                $(document).off('mouseup touchend', onUp);
-                triggerFromSlider();
-            }
-
-            $(document).on('mousemove touchmove', onMove);
-            $(document).on('mouseup touchend', onUp);
-        });
-
-        updateSlider();
+        $range.css('left', minPercent + '%').css('right', (100 - maxPercent) + '%');
+        $minValue.text(currency + Math.round(currentMin).toLocaleString());
+        $maxValue.text(currency + Math.round(currentMax).toLocaleString());
+        $minInput.val(currentMin);
+        $maxInput.val(currentMax);
     }
 
-    $(document).on('mouseenter', '.wpb-price-range-slider', function() {
+    function initPriceSliders(context) {
+        $(context || document).find('.wpb-price-range-slider').each(function() {
+            updatePriceSlider($(this));
+        });
+    }
+
+    $(document).on('input change', '.wpb-price-range-min, .wpb-price-range-max', function(event) {
+        var $rangeInput = $(this);
+        var $slider = $rangeInput.closest('.wpb-price-range-slider');
+        var $filterContainer = $slider.closest('.wpb-price-range-filter');
+        updatePriceSlider($slider, $rangeInput.hasClass('wpb-price-range-min') ? 'min' : 'max');
+
+        if ($filterContainer.attr('data-auto-filter') === 'yes') {
+            clearTimeout($filterContainer.data('priceTimeout'));
+            $filterContainer.data('priceTimeout', setTimeout(function() {
+                triggerPriceFilter($filterContainer);
+            }, event.type === 'input' ? 450 : 0));
+        }
+    });
+
+    $(document).on('click', '.wpb-price-filter-button', function() {
+        triggerPriceFilter($(this).closest('.wpb-price-range-filter'));
+    });
+
+    $(function() {
+        initPriceSliders(document);
+    });
+
+    $(window).on('elementor/frontend/init', function() {
+        if (window.elementorFrontend && elementorFrontend.hooks) {
+            elementorFrontend.hooks.addAction('frontend/element_ready/wpb-price-range.default', function($scope) {
+                initPriceSliders($scope);
+            });
+        }
+    });
+
+    $(document).on('mouseenter focusin touchstart', '.wpb-price-range-slider', function() {
         var $slider = $(this);
         if (!$slider.data('initialized')) {
             $slider.data('initialized', true);
-            initPriceSlider($slider);
+            updatePriceSlider($slider);
         }
     });
 
@@ -602,6 +580,7 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             badge_text: settings.badge_text || 'Sale',
             auto_sale_badge: settings.auto_sale_badge || 'no',
             show_discount_percentage: settings.show_discount_percentage || 'no',
+            button_full_width: settings.button_full_width || 'no',
             button_text: settings.button_text || 'Add to Cart',
             variable_button_text: settings.variable_button_text || 'Select options',
             added_button_text: settings.added_button_text || ''

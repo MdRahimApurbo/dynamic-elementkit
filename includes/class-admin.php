@@ -277,13 +277,14 @@ class WPB_Admin {
 
         $name = isset($_POST['wpb_template_name']) ? sanitize_text_field($_POST['wpb_template_name']) : '';
         $type = isset($_POST['wpb_template_type']) ? sanitize_text_field($_POST['wpb_template_type']) : '';
+        $allowed_types = ['shop', 'cart', 'checkout', 'thankyou', 'myaccount', 'product', 'product-category', 'product-tag', 'archive'];
 
         if (empty($name)) {
             wp_redirect(add_query_arg(['page' => 'wpb-page-builder', 'error' => 'name_required'], admin_url('admin.php')));
             exit;
         }
 
-        if (empty($type)) {
+        if (empty($type) || !in_array($type, $allowed_types, true)) {
             wp_redirect(add_query_arg(['page' => 'wpb-page-builder', 'error' => 'type_required'], admin_url('admin.php')));
             exit;
         }
@@ -468,6 +469,7 @@ class WPB_Admin {
                     'shop'             => __('Shop', 'woocommerce-page-builder'),
                     'cart'             => __('Cart', 'woocommerce-page-builder'),
                     'checkout'         => __('Checkout', 'woocommerce-page-builder'),
+                    'thankyou'         => __('Thank You', 'woocommerce-page-builder'),
                     'myaccount'        => __('My Account', 'woocommerce-page-builder'),
                     'product'          => __('Single Product', 'woocommerce-page-builder'),
                     'product-category' => __('Product Category', 'woocommerce-page-builder'),
@@ -541,6 +543,7 @@ class WPB_Admin {
                     <option value="shop"><?php _e('Shop', 'woocommerce-page-builder'); ?></option>
                     <option value="cart"><?php _e('Cart', 'woocommerce-page-builder'); ?></option>
                     <option value="checkout"><?php _e('Checkout', 'woocommerce-page-builder'); ?></option>
+                    <option value="thankyou"><?php _e('Thank You', 'woocommerce-page-builder'); ?></option>
                     <option value="myaccount"><?php _e('My Account', 'woocommerce-page-builder'); ?></option>
                     <option value="product"><?php _e('Single Product', 'woocommerce-page-builder'); ?></option>
                     <option value="product-category"><?php _e('Product Category', 'woocommerce-page-builder'); ?></option>

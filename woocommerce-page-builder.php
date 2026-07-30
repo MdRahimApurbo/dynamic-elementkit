@@ -177,7 +177,11 @@ function wpb_ajax_get_cart_fragments() {
     }
 
     $show_thumbnail = isset($_POST['show_thumbnail']) ? sanitize_text_field($_POST['show_thumbnail']) : 'yes';
-    $empty_text = isset($_POST['empty_text']) ? sanitize_text_field($_POST['empty_text']) : __('Your cart is empty.', 'woocommerce-page-builder');
+    $empty_text = !empty($_POST['empty_text']) ? sanitize_text_field(wp_unslash($_POST['empty_text'])) : __('আপনার শপিং কার্টটি খালি।', 'woocommerce-page-builder');
+    $continue_text = !empty($_POST['continue_text']) ? sanitize_text_field(wp_unslash($_POST['continue_text'])) : __('কেনাকাটা চালিয়ে যান', 'woocommerce-page-builder');
+    $subtotal_text = !empty($_POST['subtotal_text']) ? sanitize_text_field(wp_unslash($_POST['subtotal_text'])) : __('মোট পণ্যমূল্য', 'woocommerce-page-builder');
+    $shipping_text = !empty($_POST['shipping_text']) ? sanitize_text_field(wp_unslash($_POST['shipping_text'])) : __('চেকআউটের সময় ডেলিভারি চার্জ হিসাব করা হবে।', 'woocommerce-page-builder');
+    $checkout_text = !empty($_POST['checkout_text']) ? sanitize_text_field(wp_unslash($_POST['checkout_text'])) : __('অর্ডার সম্পন্ন করুন', 'woocommerce-page-builder');
     $count = WC()->cart->get_cart_contents_count();
     $subtotal = WC()->cart->get_cart_subtotal();
 
@@ -194,18 +198,18 @@ function wpb_ajax_get_cart_fragments() {
             $item_price = WC()->cart->get_product_price($product);
             $permalink = $product->get_permalink($cart_item);
             ?>
-            <div class="wpb-cart-item" data-key="<?php echo esc_attr($cart_item_key); ?>" style="position:relative;display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;">
-                <?php if ($show_thumbnail === 'yes'): ?>
-                    <a href="<?php echo esc_url($permalink); ?>" class="wpb-cart-item-thumb" style="flex-shrink:0;">
+            <div class="wpb-cart-item<?php echo 'yes' === $show_thumbnail ? '' : ' wpb-cart-item-no-thumb'; ?>" data-key="<?php echo esc_attr($cart_item_key); ?>">
+                <?php if ($show_thumbnail === 'yes'): ?>
+                    <a href="<?php echo esc_url($permalink); ?>" class="wpb-cart-item-thumb">
                         <?php echo $product->get_image('thumbnail'); ?>
                     </a>
                 <?php endif; ?>
-                <div class="wpb-cart-item-info" style="flex:1;min-width:0;padding-right:24px;">
-                    <a href="<?php echo esc_url($permalink); ?>" class="wpb-cart-item-title" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:14px;color:#1f2937;text-decoration:none;"><?php echo esc_html($product->get_name()); ?></a>
-                    <span class="wpb-cart-item-qty" style="font-size:13px;color:#6b7280;">×<?php echo esc_html($qty); ?></span>
-                    <span class="wpb-cart-item-price" style="font-weight:700;color:#1f2937;font-size:14px;margin-top:4px;display:block;"><?php echo wp_kses_post($item_price); ?></span>
-                </div>
-                <button type="button" class="wpb-cart-remove" data-key="<?php echo esc_attr($cart_item_key); ?>" aria-label="<?php esc_attr_e('Remove', 'woocommerce-page-builder'); ?>" style="position:absolute;top:8px;right:4px;background:none;border:none;font-size:16px;cursor:pointer;color:#9ca3af;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s;flex-shrink:0;">&times;</button>
+                <div class="wpb-cart-item-info">
+                    <a href="<?php echo esc_url($permalink); ?>" class="wpb-cart-item-title"><?php echo esc_html($product->get_name()); ?></a>
+                    <span class="wpb-cart-item-qty">×<?php echo esc_html($qty); ?></span>
+                    <span class="wpb-cart-item-price"><?php echo wp_kses_post($item_price); ?></span>
+                </div>
+                <button type="button" class="wpb-cart-remove" data-key="<?php echo esc_attr($cart_item_key); ?>" aria-label="<?php esc_attr_e('কার্ট থেকে সরান', 'woocommerce-page-builder'); ?>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"></path></svg></button>
             </div>
             <?php
         }
@@ -215,20 +219,20 @@ function wpb_ajax_get_cart_fragments() {
     ob_start();
     if (WC()->cart->is_empty()) {
         ?>
-        <div class="wpb-cart-panel-footer-empty" style="padding:16px;border-top:1px solid #eee;background:#f9fafb;text-align:center;">
-            <a href="<?php echo esc_url(wc_get_cart_url()); ?>" style="display:block;width:100%;padding:12px;text-align:center;background:#1f2937;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;"><?php esc_html_e('Start Shopping', 'woocommerce-page-builder'); ?></a>
+        <div class="wpb-cart-panel-footer-empty wpb-cart-footer">
+            <a class="wpb-cart-checkout-btn" href="<?php echo esc_url(wc_get_page_permalink('shop')); ?>"><?php echo esc_html($continue_text); ?></a>
         </div>
         <?php
     } else {
         ?>
-        <div class="wpb-cart-panel-footer" style="padding:16px;border-top:1px solid #eee;background:#f9fafb;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:15px;">
-                <span style="color:#6b7280;"><?php esc_html_e('Subtotal', 'woocommerce-page-builder'); ?></span>
-                <span style="font-weight:700;color:#1f2937;"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
-            </div>
-            <span class="wpb-cart-subtotal-trigger" style="display:none;"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
-            <p style="font-size:12px;color:#6b7280;margin-bottom:12px;"><?php esc_html_e('Shipping and taxes calculated at checkout.', 'woocommerce-page-builder'); ?></p>
-            <a href="<?php echo esc_url(wc_get_cart_url()); ?>" style="display:block;width:100%;padding:14px;text-align:center;background:#1f2937;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;"><?php esc_html_e('Checkout', 'woocommerce-page-builder'); ?></a>
+        <div class="wpb-cart-panel-footer wpb-cart-footer">
+            <div class="wpb-cart-subtotal-row">
+                <span><?php echo esc_html($subtotal_text); ?></span>
+                <span class="wpb-cart-subtotal"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
+            </div>
+            <span class="wpb-cart-subtotal-trigger" style="display:none;"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
+            <p class="wpb-cart-shipping-note"><?php echo esc_html($shipping_text); ?></p>
+            <a class="wpb-cart-checkout-btn" href="<?php echo esc_url(wc_get_checkout_url()); ?>"><?php echo esc_html($checkout_text); ?></a>
         </div>
         <?php
     }
@@ -269,13 +273,238 @@ function wpb_ajax_cart_remove_item() {
     wp_send_json_success(['removed' => true]);
 }
 
-/**
- * AJAX: Update cart quantity
- */
+/**
+ * Temporarily replace WooCommerce's in-memory cart with the checkout widget's
+ * isolated cart. The normal cart is restored before WooCommerce persists the
+ * session, so neither cart can overwrite the other.
+ */
+function wpb_checkout_activate_isolated_cart($product_id = 0, $quantity = 1) {
+    global $wpb_checkout_isolated_cart_active, $wpb_checkout_normal_cart_snapshot;
+
+    if (!empty($wpb_checkout_isolated_cart_active)) {
+        return true;
+    }
+
+    if (!function_exists('WC') || !WC()->cart || !WC()->session) {
+        return false;
+    }
+
+    $session = WC()->session;
+    $cart = WC()->cart;
+    $stored_config = $session->get('wpb_checkout_isolated_config', []);
+    $stored_product_id = absint($stored_config['product_id'] ?? 0);
+    $product_id = absint($product_id ?: $stored_product_id);
+
+    if (!$product_id) {
+        return false;
+    }
+
+    $product = wc_get_product($product_id);
+    if (!$product || !$product->exists() || !$product->is_purchasable() || $product->is_type('variable')) {
+        return false;
+    }
+
+    $wpb_checkout_isolated_cart_active = true;
+    $wpb_checkout_normal_cart_snapshot = [
+        'contents' => $cart->get_cart(),
+        'removed' => $cart->get_removed_cart_contents(),
+        'coupons' => $cart->get_applied_coupons(),
+        'totals' => $cart->get_totals(),
+        'session' => [],
+    ];
+
+    foreach ([
+        'cart',
+        'cart_totals',
+        'applied_coupons',
+        'coupon_discount_totals',
+        'coupon_discount_tax_totals',
+        'removed_cart_contents',
+        'chosen_shipping_methods',
+    ] as $key) {
+        $wpb_checkout_normal_cart_snapshot['session'][$key] = $session->get($key, null);
+    }
+
+    $stored_cart = $session->get('wpb_checkout_isolated_cart', []);
+    $stored_coupons = $session->get('wpb_checkout_isolated_coupons', []);
+    $stored_shipping_methods = $session->get('wpb_checkout_isolated_shipping_methods', []);
+    $same_product = $stored_product_id === $product_id;
+    $isolated_cart = $same_product ? wpb_checkout_hydrate_cart($stored_cart) : [];
+
+    $cart->set_cart_contents($isolated_cart);
+    $cart->set_removed_cart_contents([]);
+    $cart->set_applied_coupons($same_product && is_array($stored_coupons) ? $stored_coupons : []);
+    $session->set(
+        'chosen_shipping_methods',
+        $same_product && is_array($stored_shipping_methods) ? $stored_shipping_methods : []
+    );
+
+    if (!$isolated_cart) {
+        $quantity = max(1, absint($quantity));
+
+        if ($product->is_type('variation')) {
+            $added = $cart->add_to_cart(
+                $product->get_parent_id(),
+                $quantity,
+                $product->get_id(),
+                $product->get_variation_attributes()
+            );
+        } else {
+            $added = $cart->add_to_cart($product->get_id(), $quantity);
+        }
+
+        if (!$added) {
+            $cart->set_cart_contents($wpb_checkout_normal_cart_snapshot['contents']);
+            $cart->set_removed_cart_contents($wpb_checkout_normal_cart_snapshot['removed']);
+            $cart->set_applied_coupons($wpb_checkout_normal_cart_snapshot['coupons']);
+            $cart->set_totals($wpb_checkout_normal_cart_snapshot['totals']);
+            $wpb_checkout_isolated_cart_active = false;
+            $wpb_checkout_normal_cart_snapshot = [];
+            return false;
+        }
+    }
+
+    $session->set('wpb_checkout_isolated_config', ['product_id' => $product_id]);
+    $cart->calculate_totals();
+    add_action('shutdown', 'wpb_checkout_restore_normal_cart', -1);
+
+    return true;
+}
+
+function wpb_checkout_restore_normal_cart() {
+    global $wpb_checkout_isolated_cart_active, $wpb_checkout_normal_cart_snapshot;
+
+    if (
+        empty($wpb_checkout_isolated_cart_active) ||
+        empty($wpb_checkout_normal_cart_snapshot) ||
+        !function_exists('WC') ||
+        !WC()->cart ||
+        !WC()->session
+    ) {
+        return;
+    }
+
+    $cart = WC()->cart;
+    $session = WC()->session;
+
+    $session->set('wpb_checkout_isolated_cart', wpb_checkout_cart_for_session($cart->get_cart()));
+    $session->set('wpb_checkout_isolated_coupons', $cart->get_applied_coupons());
+    $session->set(
+        'wpb_checkout_isolated_shipping_methods',
+        $session->get('chosen_shipping_methods', [])
+    );
+
+    $cart->set_cart_contents($wpb_checkout_normal_cart_snapshot['contents']);
+    $cart->set_removed_cart_contents($wpb_checkout_normal_cart_snapshot['removed']);
+    $cart->set_applied_coupons($wpb_checkout_normal_cart_snapshot['coupons']);
+    $cart->set_totals($wpb_checkout_normal_cart_snapshot['totals']);
+
+    foreach ($wpb_checkout_normal_cart_snapshot['session'] as $key => $value) {
+        if (null === $value) {
+            $session->__unset($key);
+        } else {
+            $session->set($key, $value);
+        }
+    }
+
+    $wpb_checkout_isolated_cart_active = false;
+    $wpb_checkout_normal_cart_snapshot = [];
+}
+
+function wpb_checkout_cart_for_session($cart_contents) {
+    $stored_cart = [];
+
+    foreach ((array) $cart_contents as $cart_item_key => $cart_item) {
+        if (!is_array($cart_item)) {
+            continue;
+        }
+
+        unset($cart_item['data']);
+        $stored_cart[$cart_item_key] = $cart_item;
+    }
+
+    return $stored_cart;
+}
+
+function wpb_checkout_hydrate_cart($stored_cart) {
+    $cart_contents = [];
+
+    foreach ((array) $stored_cart as $cart_item_key => $cart_item) {
+        if (!is_array($cart_item)) {
+            continue;
+        }
+
+        $product_id = !empty($cart_item['variation_id'])
+            ? absint($cart_item['variation_id'])
+            : absint($cart_item['product_id'] ?? 0);
+        $product = $product_id ? wc_get_product($product_id) : false;
+
+        if (!$product || !$product->exists() || !$product->is_purchasable()) {
+            continue;
+        }
+
+        $stored_item = $cart_item;
+        $cart_item['data'] = $product;
+        $cart_item = apply_filters(
+            'woocommerce_get_cart_item_from_session',
+            $cart_item,
+            $stored_item,
+            $cart_item_key
+        );
+
+        if (empty($cart_item['data']) || !$cart_item['data'] instanceof \WC_Product) {
+            $cart_item['data'] = $product;
+        }
+        $cart_contents[$cart_item_key] = $cart_item;
+    }
+
+    return $cart_contents;
+}
+
+function wpb_checkout_clear_isolated_cart() {
+    if (!function_exists('WC') || !WC()->session) {
+        return;
+    }
+
+    WC()->session->__unset('wpb_checkout_isolated_config');
+    WC()->session->__unset('wpb_checkout_isolated_cart');
+    WC()->session->__unset('wpb_checkout_isolated_coupons');
+    WC()->session->__unset('wpb_checkout_isolated_shipping_methods');
+}
+
+add_filter('woocommerce_persistent_cart_enabled', function($enabled) {
+    global $wpb_checkout_isolated_cart_active;
+    return !empty($wpb_checkout_isolated_cart_active) ? false : $enabled;
+});
+
+function wpb_checkout_request_is_widget() {
+    $request = $_POST;
+
+    if (!empty($_POST['post_data']) && is_string($_POST['post_data'])) {
+        parse_str(wp_unslash($_POST['post_data']), $request);
+    }
+
+    return !empty($request['wpb_checkout_widget']);
+}
+
+function wpb_checkout_activate_isolated_cart_for_request() {
+    if (!wpb_checkout_request_is_widget()) {
+        return;
+    }
+
+    wpb_checkout_activate_isolated_cart();
+}
+
+add_action('wc_ajax_update_order_review', 'wpb_checkout_activate_isolated_cart_for_request', 0);
+add_action('wc_ajax_checkout', 'wpb_checkout_activate_isolated_cart_for_request', 0);
+
+/**
+ * AJAX: Update cart quantity
+ */
 add_action('wp_ajax_wpb_update_cart_quantity', 'wpb_ajax_update_cart_quantity');
 add_action('wp_ajax_nopriv_wpb_update_cart_quantity', 'wpb_ajax_update_cart_quantity');
 
-function wpb_ajax_update_cart_quantity() {
+function wpb_ajax_update_cart_quantity() {
     $nonce = isset($_POST['_wpnonce']) ? $_POST['_wpnonce'] : '';
     if (!wp_verify_nonce($nonce, 'wpb_toggle_active')) {
         wp_send_json_error(['message' => __('Security check failed.', 'woocommerce-page-builder')]);
@@ -285,179 +514,222 @@ function wpb_ajax_update_cart_quantity() {
         wp_send_json_error(['message' => __('WooCommerce not available.', 'woocommerce-page-builder')]);
     }
 
-    $cart_item_key = isset($_POST['cart_item_key']) ? sanitize_text_field($_POST['cart_item_key']) : '';
-    $quantity = isset($_POST['quantity']) ? (int) $_POST['quantity'] : 1;
-    $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
-
-    if ($product_id > 0 && empty($cart_item_key)) {
-        $added = WC()->cart->add_to_cart($product_id, $quantity);
-        if (!$added) {
-            wp_send_json_error(['message' => __('Could not add to cart.', 'woocommerce-page-builder')]);
-        }
-        $cart_item_key = $added;
-    } elseif ($cart_item_key) {
-        $cart = WC()->cart;
-        $cart->set_quantity($cart_item_key, $quantity, false);
-        $cart->calculate_totals();
-    }
-
-    $subtotal = WC()->cart->get_cart_subtotal();
-    $total = WC()->cart->get_cart_total();
-    $count = WC()->cart->get_cart_contents_count();
-
-    wp_send_json_success([
-        'subtotal' => wp_kses_post($subtotal),
-        'total' => wp_kses_post($total),
-        'count' => $count,
-    ]);
-}
-
-/**
- * AJAX: Quick checkout
- */
-add_action('wp_ajax_wpb_quick_checkout', 'wpb_ajax_quick_checkout');
-add_action('wp_ajax_nopriv_wpb_quick_checkout', 'wpb_ajax_quick_checkout');
-
-function wpb_ajax_quick_checkout() {
-    $nonce = isset($_POST['wpb_checkout_nonce']) ? $_POST['wpb_checkout_nonce'] : '';
-    if (!wp_verify_nonce($nonce, 'wpb_checkout')) {
-        wp_send_json_error(['message' => __('Security check failed.', 'woocommerce-page-builder')]);
-    }
-
-    if (!class_exists('WooCommerce') || !WC()->cart) {
-        wp_send_json_error(['message' => __('WooCommerce cart is not available.', 'woocommerce-page-builder')]);
-    }
-
-    $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
-
-    if (WC()->cart->is_empty() && !$product_id) {
-        wp_send_json_error(['message' => __('Your cart is empty.', 'woocommerce-page-builder')]);
-    }
-
-    if ($product_id && WC()->cart->is_empty()) {
-        $product = wc_get_product($product_id);
-        if ($product && $product->is_purchasable()) {
-            WC()->cart->empty_cart();
-            WC()->cart->add_to_cart($product_id, 1);
-        }
-    }
-
-    $name = isset($_POST['customer_name']) ? sanitize_text_field($_POST['customer_name']) : '';
-    $phone = isset($_POST['customer_phone']) ? sanitize_text_field($_POST['customer_phone']) : '';
-    $address = isset($_POST['customer_address']) ? sanitize_text_field($_POST['customer_address']) : '';
-    $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : '';
-    $gateway_prefix = str_replace('woo_', '', $payment_method);
-    $transaction_id = isset($_POST[$gateway_prefix . '_trans_id']) ? sanitize_text_field($_POST[$gateway_prefix . '_trans_id']) : (isset($_POST['bkash_trans_id']) ? sanitize_text_field($_POST['bkash_trans_id']) : '');
-    $account_number = isset($_POST[$gateway_prefix . '_acc_no']) ? sanitize_text_field($_POST[$gateway_prefix . '_acc_no']) : (isset($_POST['bkash_acc_no']) ? sanitize_text_field($_POST['bkash_acc_no']) : '');
-
-    if (empty($name) || empty($phone) || empty($address)) {
-        wp_send_json_error(['message' => __('Please fill all required fields.', 'woocommerce-page-builder')]);
-    }
-
-    if (empty($payment_method)) {
-        wp_send_json_error(['message' => __('Please select a payment method.', 'woocommerce-page-builder')]);
-    }
-
-    $gateways = WC()->payment_gateways()->get_available_payment_gateways();
-    if (!isset($gateways[$payment_method])) {
-        wp_send_json_error(['message' => __('Invalid payment method.', 'woocommerce-page-builder')]);
-    }
-
-    $gateway = $gateways[$payment_method];
-
-    WC()->cart->calculate_totals();
-
-    $order_id = wc_create_order([
-        'status' => 'pending',
-        'customer_id' => get_current_user_id(),
-    ]);
-
-    if (!$order_id) {
-        wp_send_json_error(['message' => __('Could not create order.', 'woocommerce-page-builder')]);
-    }
-
-    $order = wc_get_order($order_id);
-
-    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        $product = $cart_item['data'];
-        if (!$product) continue;
-        $order->add_product($product, $cart_item['quantity'], [
-            'subtotal' => $cart_item['line_subtotal'],
-            'subtotal_tax' => $cart_item['line_subtotal_tax'],
-            'total' => $cart_item['line_total'],
-            'total_tax' => $cart_item['line_tax'],
-        ]);
-    }
-
-$order->set_address([
-        'first_name' => $name,
-        'last_name' => '',
-        'company' => '',
-        'phone' => $phone,
-        'address_1' => $address,
-        'address_2' => '',
-        'city' => '',
-        'state' => '',
-        'postcode' => '',
-        'country' => '',
-    ], 'billing');
-
-    $order->set_address([
-        'first_name' => $name,
-        'last_name' => '',
-        'company' => '',
-        'phone' => $phone,
-        'address_1' => $address,
-        'address_2' => '',
-        'city' => '',
-        'state' => '',
-        'postcode' => '',
-        'country' => '',
-    ], 'shipping');
-
-    if (!empty($transaction_id)) {
-        $order->add_order_note(sprintf(__('%s Transaction ID: %s', 'woocommerce-page-builder'), $gateway->get_title(), $transaction_id));
-    }
-
-    $order->set_payment_method($gateway);
-    $order->set_payment_method_title($gateway->get_title());
-    $order->calculate_totals();
-
-    do_action('woocommerce_checkout_process', '');
-    do_action('woocommerce_checkout_update_order_meta', $order_id);
-
-    $redirect_url = '';
-    $success_message = __('Thank you! Your order has been placed successfully.', 'woocommerce-page-builder');
-
-    if ($payment_method === 'cod') {
-        $order->update_status('processing', __('Order placed via Quick Checkout.', 'woocommerce-page-builder'));
-        WC()->cart->empty_cart();
-        $redirect_url = wc_get_checkout_url();
-        $success_message = __('Thank you! Your order has been placed successfully. We will contact you soon.', 'woocommerce-page-builder');
-    } else {
-        $result = $gateway->process_payment($order_id);
-
-        if (is_wp_error($result)) {
-            wp_send_json_error(['message' => $result->get_error_message()]);
-        }
-
-        if (isset($result['result']) && $result['result'] === 'success') {
-            WC()->cart->empty_cart();
-            if (isset($result['redirect']) && $result['redirect']) {
-                $redirect_url = $result['redirect'];
-            } else {
-                $redirect_url = $order->get_checkout_order_received_url();
-            }
-        } else {
-            wp_send_json_error(['message' => __('Payment processing failed. Please try again.', 'woocommerce-page-builder')]);
-        }
-    }
-
-    wp_send_json_success([
-        'message' => $success_message,
-        'redirect' => $redirect_url,
-    ]);
-}
+    $cart_item_key = isset($_POST['cart_item_key']) ? wc_clean(wp_unslash($_POST['cart_item_key'])) : '';
+    $quantity = isset($_POST['quantity']) ? max(1, wc_stock_amount(wp_unslash($_POST['quantity']))) : 1;
+    $isolated_cart = WC()->session ? WC()->session->get('wpb_checkout_isolated_cart', []) : [];
+    if ($cart_item_key && isset($isolated_cart[$cart_item_key])) {
+        wpb_checkout_activate_isolated_cart();
+    }
+    $cart = WC()->cart;
+    $cart_item = $cart_item_key ? $cart->get_cart_item($cart_item_key) : false;
+
+    if (!$cart_item || empty($cart_item['data']) || !$cart_item['data'] instanceof \WC_Product) {
+        wp_send_json_error(['message' => __('The cart item is no longer available.', 'woocommerce-page-builder')]);
+    }
+
+    if (!$cart->set_quantity($cart_item_key, $quantity, true)) {
+        wp_send_json_error(['message' => __('The quantity could not be updated.', 'woocommerce-page-builder')]);
+    }
+
+    $cart->calculate_totals();
+    $cart_item = $cart->get_cart_item($cart_item_key);
+    $product = $cart_item['data'];
+
+    wp_send_json_success([
+        'cart_item_key' => $cart_item_key,
+        'item_subtotal' => $cart->get_product_subtotal($product, $cart_item['quantity']),
+        'subtotal' => $cart->get_cart_subtotal(),
+        'shipping' => $cart->get_cart_shipping_total(),
+        'discount' => wc_price($cart->get_discount_total()),
+        'coupons' => implode(', ', $cart->get_applied_coupons()),
+        'total' => $cart->get_cart_total(),
+        'count' => $cart->get_cart_contents_count(),
+    ]);
+}
+
+add_action('wp_ajax_wpb_get_checkout_summary', 'wpb_ajax_get_checkout_summary');
+add_action('wp_ajax_nopriv_wpb_get_checkout_summary', 'wpb_ajax_get_checkout_summary');
+
+function wpb_ajax_get_checkout_summary() {
+    $nonce = isset($_POST['_wpnonce']) ? wp_unslash($_POST['_wpnonce']) : '';
+    if (!wp_verify_nonce($nonce, 'wpb_toggle_active')) {
+        wp_send_json_error(['message' => __('Security check failed.', 'woocommerce-page-builder')]);
+    }
+
+    if (!function_exists('WC') || !WC()->cart) {
+        wp_send_json_error(['message' => __('WooCommerce cart is not available.', 'woocommerce-page-builder')]);
+    }
+
+    wpb_checkout_activate_isolated_cart();
+    WC()->cart->calculate_totals();
+    $shipping_methods_html = wpb_get_checkout_shipping_methods_html();
+
+    wp_send_json_success([
+        'subtotal' => WC()->cart->get_cart_subtotal(),
+        'shipping' => WC()->cart->get_cart_shipping_total(),
+        'shipping_methods_html' => $shipping_methods_html,
+        'has_shipping_methods' => '' !== $shipping_methods_html,
+        'discount' => wc_price(WC()->cart->get_discount_total()),
+        'coupons' => implode(', ', WC()->cart->get_applied_coupons()),
+        'total' => WC()->cart->get_cart_total(),
+    ]);
+}
+
+/**
+ * Render selectable shipping rates using WooCommerce's canonical field names.
+ *
+ * WooCommerce's checkout script watches these inputs and recalculates totals
+ * through wc-ajax=update_order_review when the customer changes a method.
+ */
+function wpb_get_checkout_shipping_methods_html() {
+    if (
+        !function_exists('WC') ||
+        !WC()->cart ||
+        !WC()->session ||
+        !WC()->cart->needs_shipping() ||
+        !WC()->cart->show_shipping()
+    ) {
+        return '';
+    }
+
+    $packages = WC()->shipping()->get_packages();
+    $packages_with_rates = array_filter($packages, static function($package) {
+        return !empty($package['rates']) && is_array($package['rates']);
+    });
+
+    if (!$packages_with_rates) {
+        return '';
+    }
+
+    ob_start();
+    foreach ($packages_with_rates as $package_index => $package) {
+        $chosen_method = wc_get_chosen_shipping_method_for_package($package_index, $package);
+        $package_name = apply_filters(
+            'woocommerce_shipping_package_name',
+            sprintf(__('Shipping %d', 'woocommerce'), $package_index + 1),
+            $package_index,
+            $package
+        );
+        ?>
+        <div class="wpb-shipping-package">
+            <?php if (count($packages_with_rates) > 1): ?>
+                <span class="wpb-shipping-package-name"><?php echo esc_html($package_name); ?></span>
+            <?php endif; ?>
+            <ul class="woocommerce-shipping-methods">
+                <?php foreach ($package['rates'] as $method): ?>
+                    <?php
+                    $input_id = 'shipping_method_' . $package_index . '_' . sanitize_title($method->id);
+                    ?>
+                    <li>
+                        <input type="radio"
+                               name="shipping_method[<?php echo esc_attr($package_index); ?>]"
+                               data-index="<?php echo esc_attr($package_index); ?>"
+                               id="<?php echo esc_attr($input_id); ?>"
+                               value="<?php echo esc_attr($method->id); ?>"
+                               class="shipping_method"
+                               <?php checked($method->id, $chosen_method); ?>>
+                        <label for="<?php echo esc_attr($input_id); ?>">
+                            <?php echo wp_kses_post(wc_cart_totals_shipping_method_label($method)); ?>
+                        </label>
+                        <?php do_action('woocommerce_after_shipping_rate', $method, $package_index); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php
+    }
+
+    return trim(ob_get_clean());
+}
+
+/**
+ * Limit native checkout validation to the checkout widget's three customer fields.
+ * Order creation still runs through WC_Checkout::process_checkout().
+ */
+add_filter('woocommerce_checkout_fields', function($fields) {
+    if (empty($_POST['wpb_checkout_widget']) && empty($_POST['wpb_quick_checkout'])) {
+        return $fields;
+    }
+
+    $allowed_billing = [
+        'billing_first_name',
+        'billing_last_name',
+        'billing_phone',
+        'billing_address_1',
+        'billing_country',
+    ];
+
+    foreach ($fields['billing'] ?? [] as $key => $field) {
+        if (!in_array($key, $allowed_billing, true)) {
+            unset($fields['billing'][$key]);
+        }
+    }
+
+    foreach (['billing_first_name', 'billing_phone', 'billing_address_1'] as $required_key) {
+        if (isset($fields['billing'][$required_key])) {
+            $fields['billing'][$required_key]['required'] = true;
+        }
+    }
+
+    if (isset($fields['billing']['billing_last_name'])) {
+        $fields['billing']['billing_last_name']['required'] = false;
+    }
+
+    if (isset($fields['billing']['billing_country'])) {
+        $fields['billing']['billing_country']['required'] = false;
+    }
+
+    // The checkout widget uses billing details for shipping unless a future
+    // widget version explicitly enables a separate shipping address.
+    $fields['shipping'] = [];
+
+    $fields['order'] = [];
+
+    return $fields;
+}, 999);
+
+/**
+ * Map the widget's single Full Name field onto WooCommerce's canonical order
+ * address fields before native checkout validation and order creation.
+ */
+add_filter('woocommerce_checkout_posted_data', function($data) {
+    if ((empty($_POST['wpb_checkout_widget']) && empty($_POST['wpb_quick_checkout'])) || empty($_POST['billing_full_name'])) {
+        return $data;
+    }
+
+    $full_name = sanitize_text_field(wp_unslash($_POST['billing_full_name']));
+    $parts = preg_split('/\s+/', trim($full_name), 2);
+
+    $data['billing_first_name'] = $parts[0] ?? '';
+    $data['billing_last_name'] = $parts[1] ?? '';
+
+    // The compact widget intentionally has no separate shipping form. Copy
+    // the enabled billing address into WooCommerce's canonical shipping keys
+    // so physical orders, shipping methods, taxes, and fulfillment plugins
+    // receive the same address data.
+    foreach (['first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode'] as $field) {
+        $billing_key = 'billing_' . $field;
+        if (array_key_exists($billing_key, $data)) {
+            $data['shipping_' . $field] = $data[$billing_key];
+        }
+    }
+
+    return $data;
+});
+
+add_filter('woocommerce_order_button_text', function($text) {
+    $request = $_POST;
+
+    if (!empty($_POST['post_data']) && is_string($_POST['post_data'])) {
+        parse_str(wp_unslash($_POST['post_data']), $request);
+    }
+
+    if ((empty($request['wpb_checkout_widget']) && empty($request['wpb_quick_checkout'])) || empty($request['wpb_order_button_text'])) {
+        return $text;
+    }
+
+    return sanitize_text_field(wp_unslash($request['wpb_order_button_text']));
+});
 
 /**
  * AJAX: Filter products by category
@@ -495,7 +767,8 @@ function wpb_ajax_filter_products() {
     $show_badge = isset($_POST['show_badge']) ? sanitize_text_field($_POST['show_badge']) : 'no';
     $badge_text = isset($_POST['badge_text']) ? sanitize_text_field($_POST['badge_text']) : 'Sale';
     $auto_sale_badge = isset($_POST['auto_sale_badge']) ? sanitize_text_field($_POST['auto_sale_badge']) : 'no';
-    $show_discount_percentage = isset($_POST['show_discount_percentage']) ? sanitize_text_field($_POST['show_discount_percentage']) : 'no';
+    $show_discount_percentage = isset($_POST['show_discount_percentage']) ? sanitize_text_field($_POST['show_discount_percentage']) : 'no';
+    $button_full_width = isset($_POST['button_full_width']) && 'yes' === sanitize_text_field($_POST['button_full_width']) ? 'yes' : 'no';
     $button_text = isset($_POST['button_text']) ? sanitize_text_field($_POST['button_text']) : __('Add to Cart', 'woocommerce-page-builder');
     $variable_button_text = isset($_POST['variable_button_text']) ? sanitize_text_field($_POST['variable_button_text']) : __('Select options', 'woocommerce-page-builder');
     $added_button_text = isset($_POST['added_button_text']) ? sanitize_text_field($_POST['added_button_text']) : __('Added!', 'woocommerce-page-builder');
@@ -637,12 +910,12 @@ function wpb_ajax_filter_products() {
                         <?php if ($show_add_to_cart === 'yes' && $product): ?>
                             <div class="wpb-product-add-to-cart">
                                 <?php if ($product->is_type('variable')): ?>
-                                    <a href="<?php the_permalink(); ?>" class="wpb-add-to-cart button wpb-variation-button">
+                                    <a href="<?php the_permalink(); ?>" class="wpb-add-to-cart button wpb-variation-button<?php echo 'yes' === $button_full_width ? ' wpb-full-width' : ''; ?>">
                                         <span class="wpb-button-text"><?php echo esc_html($variable_button_text); ?></span>
                                         <span class="wpb-button-spinner" aria-hidden="true"></span>
                                     </a>
                                 <?php else: ?>
-                                    <button class="wpb-add-to-cart button" data-product-id="<?php echo esc_attr($product->get_id()); ?>">
+                                    <button class="wpb-add-to-cart button<?php echo 'yes' === $button_full_width ? ' wpb-full-width' : ''; ?>" data-product-id="<?php echo esc_attr($product->get_id()); ?>">
                                         <span class="wpb-button-text"><?php echo esc_html($button_text); ?></span>
                                         <span class="wpb-button-spinner" aria-hidden="true"></span>
                                     </button>
@@ -793,8 +1066,16 @@ function wpb_get_current_active_template() {
     if (!function_exists('is_woocommerce')) {
         return false;
     }
+
+    // Payment is a transactional endpoint and must retain its native screen.
+    if (function_exists('is_checkout_pay_page') && is_checkout_pay_page()) {
+        return false;
+    }
+
     $type = null;
-    if (is_product()) {
+    if (function_exists('is_order_received_page') && is_order_received_page()) {
+        $type = 'thankyou';
+    } elseif (is_product()) {
         $type = 'product';
     } elseif (is_product_category()) {
         $type = 'product-category';
@@ -818,6 +1099,97 @@ function wpb_get_current_active_template() {
     }
     return $active_template;
 }
+
+/**
+ * Checkout responses contain customer-specific cart data and nonces. Prevent
+ * page/CDN caches from serving another session or an expired checkout nonce.
+ */
+function wpb_disable_cache_for_dynamic_checkout() {
+    $active_template = wpb_get_current_active_template();
+    $is_checkout_request = function_exists('is_checkout') && is_checkout();
+    $document_id = $active_template ? (int) $active_template->ID : (int) get_queried_object_id();
+    $elementor_data = $document_id ? get_post_meta($document_id, '_elementor_data', true) : [];
+    $elements = is_string($elementor_data) ? json_decode($elementor_data, true) : $elementor_data;
+
+    if (!$is_checkout_request && !wpb_elementor_data_has_widget($elements, 'wpb-checkout-form')) {
+        return;
+    }
+
+    if (!defined('DONOTCACHEPAGE')) {
+        define('DONOTCACHEPAGE', true);
+    }
+
+    if (function_exists('wc_nocache_headers')) {
+        wc_nocache_headers();
+    } else {
+        nocache_headers();
+    }
+}
+
+/**
+ * Persist the WooCommerce guest session before the checkout template renders.
+ * Private browser windows then keep the same cart for the order AJAX request.
+ */
+function wpb_prepare_guest_checkout_session() {
+    $is_checkout_request = function_exists('is_checkout') && is_checkout();
+    $active_template = wpb_get_current_active_template();
+    $document_id = $active_template ? (int) $active_template->ID : (int) get_queried_object_id();
+    $elementor_data = $document_id ? get_post_meta($document_id, '_elementor_data', true) : [];
+    $elements = is_string($elementor_data) ? json_decode($elementor_data, true) : $elementor_data;
+    $has_checkout_widget = wpb_elementor_data_has_widget($elements, 'wpb-checkout-form');
+
+    if (
+        is_admin() ||
+        wp_doing_ajax() ||
+        (!$is_checkout_request && !$has_checkout_widget) ||
+        (function_exists('is_checkout_pay_page') && is_checkout_pay_page()) ||
+        (function_exists('is_order_received_page') && is_order_received_page())
+    ) {
+        return;
+    }
+
+    foreach (['DONOTCACHEPAGE', 'DONOTCACHEDB', 'DONOTCACHEOBJECT'] as $constant) {
+        if (!defined($constant)) {
+            define($constant, true);
+        }
+    }
+
+    if (function_exists('wc_nocache_headers')) {
+        wc_nocache_headers();
+    } else {
+        nocache_headers();
+    }
+
+    if (function_exists('WC') && WC()->session && method_exists(WC()->session, 'set_customer_session_cookie')) {
+        WC()->session->set_customer_session_cookie(true);
+    }
+}
+
+add_action('template_redirect', 'wpb_prepare_guest_checkout_session', 0);
+
+function wpb_elementor_data_has_widget($elements, $widget_name) {
+    if (!is_array($elements)) {
+        return false;
+    }
+
+    foreach ($elements as $element) {
+        if (!is_array($element)) {
+            continue;
+        }
+
+        if (($element['widgetType'] ?? '') === $widget_name) {
+            return true;
+        }
+
+        if (!empty($element['elements']) && wpb_elementor_data_has_widget($element['elements'], $widget_name)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+add_action('template_redirect', 'wpb_disable_cache_for_dynamic_checkout', 1);
 
 /**
  * Register the dynamic document before Elementor's frontend enqueue pass.
@@ -983,17 +1355,43 @@ class WooCommerce_Page_Builder {
         add_action('elementor/editor/after_enqueue_styles', [$this, 'enqueue_frontend_assets']);
     }
 
-    public function register_dynamic_tags( $dynamic_tags_manager ) {
+    public function register_dynamic_tags( $dynamic_tags_manager ) {
         $dynamic_tags_manager->register_group( 'wpb_product', [
             'title' => __( 'WooCommerce Page Builder', 'woocommerce-page-builder' ),
         ] );
 
-        require_once WPB_PLUGIN_PATH . 'includes/dynamic-tags/tags/product-title-tag.php';
-        require_once WPB_PLUGIN_PATH . 'includes/dynamic-tags/tags/product-description-tag.php';
-
-        $dynamic_tags_manager->register( new \WooCommerce_Page_Builder\Dynamic_Tags\Tags\Product_Title_Tag() );
-        $dynamic_tags_manager->register( new \WooCommerce_Page_Builder\Dynamic_Tags\Tags\Product_Description_Tag() );
-    }
+        require_once WPB_PLUGIN_PATH . 'includes/dynamic-tags/tags/product-data-tags.php';
+        require_once WPB_PLUGIN_PATH . 'includes/dynamic-tags/tags/product-title-tag.php';
+        require_once WPB_PLUGIN_PATH . 'includes/dynamic-tags/tags/product-description-tag.php';
+
+        $dynamic_tags_manager->register( new \WooCommerce_Page_Builder\Dynamic_Tags\Tags\Product_Title_Tag() );
+        $dynamic_tags_manager->register( new \WooCommerce_Page_Builder\Dynamic_Tags\Tags\Product_Description_Tag() );
+        foreach ([
+            'Product_ID_Tag',
+            'Product_SKU_Tag',
+            'Product_Short_Description_Tag',
+            'Product_Price_Tag',
+            'Product_Regular_Price_Tag',
+            'Product_Sale_Price_Tag',
+            'Product_Sale_Percentage_Tag',
+            'Product_Stock_Status_Tag',
+            'Product_Stock_Quantity_Tag',
+            'Product_Type_Tag',
+            'Product_Weight_Tag',
+            'Product_Dimensions_Tag',
+            'Product_Categories_Tag',
+            'Product_Tags_Tag',
+            'Product_Rating_Tag',
+            'Product_Review_Count_Tag',
+            'Product_URL_Tag',
+            'Product_Image_Tag',
+        ] as $tag_class) {
+            $class_name = '\\WooCommerce_Page_Builder\\Dynamic_Tags\\Tags\\' . $tag_class;
+            if (class_exists($class_name)) {
+                $dynamic_tags_manager->register(new $class_name());
+            }
+        }
+    }
 
     public function enqueue_frontend_assets() {
         $embla_version = '8.0.1';
@@ -1008,16 +1406,28 @@ class WooCommerce_Page_Builder {
         $cart_js_version = file_exists(WPB_PLUGIN_PATH . 'assets/js/cart.js') ? filemtime(WPB_PLUGIN_PATH . 'assets/js/cart.js') : WPB_VERSION;
 
         wp_enqueue_style('wpb-cart', WPB_PLUGIN_URL . 'assets/css/cart.css', [], $cart_css_version);
-        wp_enqueue_script('wpb-cart', WPB_PLUGIN_URL . 'assets/js/cart.js', ['jquery'], $cart_js_version, true);
+        wp_enqueue_script('wpb-cart', WPB_PLUGIN_URL . 'assets/js/cart.js', ['jquery'], $cart_js_version, true);
+
+        $sidebar_menu_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/sidebar-menu.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/sidebar-menu.css') : WPB_VERSION;
+        $sidebar_menu_js_version = file_exists(WPB_PLUGIN_PATH . 'assets/js/sidebar-menu.js') ? filemtime(WPB_PLUGIN_PATH . 'assets/js/sidebar-menu.js') : WPB_VERSION;
+        wp_enqueue_style('wpb-sidebar-menu', WPB_PLUGIN_URL . 'assets/css/sidebar-menu.css', [], $sidebar_menu_css_version);
+        wp_enqueue_script('wpb-sidebar-menu', WPB_PLUGIN_URL . 'assets/js/sidebar-menu.js', [], $sidebar_menu_js_version, true);
 
-        $checkout_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/checkout.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/checkout.css') : WPB_VERSION;
-
-        wp_enqueue_style('wpb-checkout', WPB_PLUGIN_URL . 'assets/css/checkout.css', [], $checkout_css_version);
-        wp_enqueue_script('wpb-checkout', WPB_PLUGIN_URL . 'assets/js/checkout.js', ['jquery', 'wpb-product-grid'], WPB_VERSION, true);
+        $checkout_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/checkout.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/checkout.css') : WPB_VERSION;
+        $checkout_js_version = file_exists(WPB_PLUGIN_PATH . 'assets/js/checkout.js') ? filemtime(WPB_PLUGIN_PATH . 'assets/js/checkout.js') : WPB_VERSION;
+
+        wp_enqueue_style('wpb-checkout', WPB_PLUGIN_URL . 'assets/css/checkout.css', [], $checkout_css_version);
+        wp_enqueue_script('wpb-checkout', WPB_PLUGIN_URL . 'assets/js/checkout.js', ['jquery', 'wpb-product-grid'], $checkout_js_version, true);
+
+        $thank_you_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/thank-you.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/thank-you.css') : WPB_VERSION;
+        wp_enqueue_style('wpb-thank-you', WPB_PLUGIN_URL . 'assets/css/thank-you.css', [], $thank_you_css_version);
 
         $product_media_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/product-media.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/product-media.css') : WPB_VERSION;
 
-        wp_enqueue_style('wpb-product-media', WPB_PLUGIN_URL . 'assets/css/product-media.css', [], $product_media_css_version);
+        wp_enqueue_style('wpb-product-media', WPB_PLUGIN_URL . 'assets/css/product-media.css', [], $product_media_css_version);
+
+        $single_product_css_version = file_exists(WPB_PLUGIN_PATH . 'assets/css/single-product.css') ? filemtime(WPB_PLUGIN_PATH . 'assets/css/single-product.css') : WPB_VERSION;
+        wp_enqueue_style('wpb-single-product', WPB_PLUGIN_URL . 'assets/css/single-product.css', [], $single_product_css_version);
 
         $product_media_js_version = file_exists(WPB_PLUGIN_PATH . 'assets/js/product-media.js') ? filemtime(WPB_PLUGIN_PATH . 'assets/js/product-media.js') : WPB_VERSION;
         wp_enqueue_script('wpb-product-media', WPB_PLUGIN_URL . 'assets/js/product-media.js', [], $product_media_js_version, true);

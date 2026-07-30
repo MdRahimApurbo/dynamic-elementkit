@@ -33,23 +33,7 @@ class Product_Description_Tag extends Tag {
 	}
 
 	public function render() {
-		$product = false;
-
-		if ( is_product() ) {
-			$product = wc_get_product( get_the_ID() );
-		} elseif ( is_shop() || is_product_category() || is_product_tag() ) {
-			global $wp_query;
-
-			if ( ! empty( $wp_query->post ) ) {
-				$product = wc_get_product( $wp_query->post->ID );
-			}
-		} elseif ( is_search() || is_archive() ) {
-			$post_id = get_the_ID();
-
-			if ( $post_id ) {
-				$product = wc_get_product( $post_id );
-			}
-		}
+		$product = function_exists( __NAMESPACE__ . '\\wpb_resolve_product' ) ? wpb_resolve_product() : false;
 
 		if ( ! $product ) {
 			return;
