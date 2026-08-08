@@ -13,11 +13,24 @@
 
     function setOrderButtonLoading($form, isLoading) {
         var $button = $form.find('#place_order');
+        var cartIsEmpty = $form.closest('.wpb-checkout-form').attr('data-cart-empty') === '1';
 
         $button
             .toggleClass('wpb-order-loading', isLoading)
-            .prop('disabled', isLoading)
+            .prop('disabled', isLoading || cartIsEmpty)
+            .attr('aria-disabled', cartIsEmpty ? 'true' : 'false')
             .attr('aria-busy', isLoading ? 'true' : 'false');
+    }
+
+    function setCheckoutEmptyState($checkout, isEmpty) {
+        var $form = $checkout.find('form.wpb-checkout-form-inner');
+
+        $checkout
+            .toggleClass('wpb-checkout-empty', isEmpty)
+            .attr('data-cart-empty', isEmpty ? '1' : '0');
+        $form.find('#place_order')
+            .prop('disabled', isEmpty)
+            .attr('aria-disabled', isEmpty ? 'true' : 'false');
     }
 
     function setOrderStatus($form, type, message) {
@@ -41,6 +54,24 @@
         $group.html(
             '<ul class="woocommerce-error" role="alert"><li>' + safeMessage + '</li></ul>'
         );
+    }
+
+    function getCheckoutContext($checkout) {
+        var context = {
+            dek_checkout_widget: 1,
+            dek_checkout_cart_mode: $checkout.find('[name="dek_checkout_cart_mode"]').val() || 'cart',
+            dek_checkout_product_id: $checkout.find('[name="dek_checkout_product_id"]').val() || 0,
+            dek_checkout_product_quantity: $checkout.find('[name="dek_checkout_product_quantity"]').val() || 1,
+            dek_checkout_nonce: $checkout.find('[name="dek_checkout_nonce"]').val() || '',
+            dek_checkout_payload: $checkout.find('[name="dek_checkout_payload"]').val() || '',
+            dek_checkout_signature: $checkout.find('[name="dek_checkout_signature"]').val() || ''
+        };
+
+        $checkout.find('[name^="shipping_method"]:checked').each(function() {
+            context[$(this).attr('name')] = $(this).val();
+        });
+
+        return context;
     }
 
     function updateSummary($checkout, data) {
@@ -76,13 +107,19 @@
             $checkout.find('[data-shipping-section]').prop('hidden', !hasShippingMethods);
             $checkout.find('[data-total-row="shipping"]').prop('hidden', !hasShippingMethods);
         }
+
+        if (typeof data.checkout_payload !== 'undefined') {
+            $checkout.find('[name="dek_checkout_payload"]').val(data.checkout_payload);
+        }
+        if (typeof data.checkout_signature !== 'undefined') {
+            $checkout.find('[name="dek_checkout_signature"]').val(data.checkout_signature);
+        }
     }
 
     function reloadSummary($checkout) {
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_get_checkout_summary',
-            _wpnonce: wpbAdmin.toggleNonce
-        }).done(function(response) {
+        $.post(dekAdmin.ajaxUrl, $.extend({
+            action: 'dek_get_checkout_summary'
+        }, getCheckoutContext($checkout))).done(function(response) {
             if (response && response.success) {
                 updateSummary($checkout, response.data || {});
             }
@@ -95,12 +132,11 @@
 
         $checkout.addClass('wpb-is-updating');
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_update_cart_quantity',
-            _wpnonce: wpbAdmin.toggleNonce,
+        $.post(dekAdmin.ajaxUrl, $.extend({
+            action: 'dek_update_cart_quantity',
             cart_item_key: cartKey,
             quantity: quantity
-        })
+        }, getCheckoutContext($checkout)))
         .done(function(response) {
             if (!response || !response.success) {
                 showCheckoutError(
@@ -128,7 +164,7 @@
     }
 
     $(document).on('input change', '.wpb-checkout-form [name="billing_full_name"]', function() {
-        splitFullName($(this).closest('form.checkout'));
+        splitFullName($(this).closest('form.wpb-checkout-form-inner'));
     });
 
     $(document).on('click', '.wpb-qty-plus, .wpb-qty-minus', function(event) {
@@ -161,6 +197,62 @@
         refreshCheckout($input.closest('.wpb-checkout-form'), $input);
     });
 
+    $(document).on('change', '.wpb-checkout-form [name^="shipping_method"]', function() {
+        reloadSummary($(this).closest('.wpb-checkout-form'));
+    });
+
+    $(document).on('click', '.wpb-checkout-form .wpb-checkout-remove-item', function(event) {
+        event.preventDefault();
+
+        var $button = $(this);
+        var $checkout = $button.closest('.wpb-checkout-form');
+
+        if ($checkout.hasClass('wpb-is-updating')) {
+            return;
+        }
+
+        $checkout.addClass('wpb-is-updating');
+        $button.prop('disabled', true).attr('aria-busy', 'true');
+
+        $.post(dekAdmin.ajaxUrl, $.extend({
+            action: 'dek_remove_checkout_item',
+            cart_item_key: $button.data('cart-key') || ''
+        }, getCheckoutContext($checkout)))
+        .done(function(response) {
+            if (!response || !response.success) {
+                showCheckoutError(
+                    $checkout,
+                    response && response.data && response.data.message
+                        ? response.data.message
+                        : 'Unable to remove the product.'
+                );
+                return;
+            }
+
+            if (response.data.order_review_html) {
+                $checkout.find('.wpb-order-review').replaceWith(response.data.order_review_html);
+            }
+
+            updateSummary($checkout, response.data || {});
+            setCheckoutEmptyState($checkout, Boolean(response.data.is_empty));
+            $(document.body).trigger('wc_fragment_refresh');
+
+            if (!response.data.is_empty) {
+                $(document.body).trigger('update_checkout');
+            }
+        })
+        .fail(function(xhr) {
+            var message = xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message
+                ? xhr.responseJSON.data.message
+                : 'Unable to remove the product. Please try again.';
+            showCheckoutError($checkout, message);
+        })
+        .always(function() {
+            $checkout.removeClass('wpb-is-updating');
+            $button.prop('disabled', false).attr('aria-busy', 'false');
+        });
+    });
+
     $(document.body).on('updated_checkout', function() {
         $('.wpb-checkout-form').each(function() {
             reloadSummary($(this));
@@ -181,11 +273,17 @@
     $(function() {
         $('form.wpb-checkout-form-inner').each(function() {
             var $form = $(this);
+            var $checkout = $form.closest('.wpb-checkout-form');
             splitFullName($form);
+            setCheckoutEmptyState($checkout, $checkout.attr('data-cart-empty') === '1');
 
-            // WooCommerce fires this event with triggerHandler(), so it must
-            // be registered directly on the form rather than delegated.
-            $form.on('checkout_place_order.wpbCheckout', function() {
+            $form.on('submit.wpbCustomCheckout', function(event) {
+                event.preventDefault();
+
+                if ($checkout.attr('data-cart-empty') === '1') {
+                    return false;
+                }
+
                 splitFullName($form);
                 setOrderButtonLoading($form, true);
                 setOrderStatus(
@@ -194,16 +292,45 @@
                     $form.find('.wpb-order-status').data('processing-text')
                 );
 
-                // A payment gateway can cancel submission after this handler.
-                // Restore the button when WooCommerce did not enter processing.
-                window.setTimeout(function() {
-                    if (!$form.hasClass('processing')) {
-                        setOrderButtonLoading($form, false);
-                        setOrderStatus($form, '', '');
-                    }
-                }, 0);
+                var requestData = $form.serializeArray();
+                requestData.push({
+                    name: 'action',
+                    value: 'dek_process_custom_checkout'
+                });
 
-                return true;
+                $.ajax({
+                    url: dekAdmin.ajaxUrl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: requestData,
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                })
+                .done(function(response) {
+                    if (response && response.success && response.data && response.data.redirect) {
+                        window.location.assign(response.data.redirect);
+                        return;
+                    }
+
+                    var message = response && response.data && response.data.message
+                        ? response.data.message
+                        : 'Unable to place the order. Please try again.';
+                    showCheckoutError($checkout, message);
+                    setOrderStatus($form, 'error', message);
+                })
+                .fail(function(xhr) {
+                    var message = xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message
+                        ? xhr.responseJSON.data.message
+                        : 'Unable to place the order. Please try again.';
+                    showCheckoutError($checkout, message);
+                    setOrderStatus($form, 'error', message);
+                })
+                .always(function() {
+                    setOrderButtonLoading($form, false);
+                });
+
+                return false;
             });
         });
     });

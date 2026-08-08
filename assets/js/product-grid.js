@@ -15,19 +15,19 @@ jQuery(document).ready(function($) {
 
         $button.addClass('loading');
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_add_to_cart',
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_add_to_cart',
             product_id: productId,
-            _wpnonce: wpbAdmin.toggleNonce
+            _wpnonce: dekAdmin.toggleNonce
         })
         .done(function(response) {
             $button.removeClass('loading');
-var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
+var addedText = $grid.data('addedButtonText') || dekAdmin.addedText;
         if (response.success && response.data.cart_contents_updated) {
             $button.find('.wpb-button-text').text(addedText);
             $button.addClass('added');
             setTimeout(function() {
-                $button.find('.wpb-button-text').text(wpbAdmin.addToCartText);
+                $button.find('.wpb-button-text').text(dekAdmin.addToCartText);
                 $button.removeClass('added');
             }, 2000);
                 if (typeof wpbUpdateCart === 'function') {
@@ -126,9 +126,9 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
         }
 
         var self = this;
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_filter_products',
-            _wpnonce: wpbAdmin.toggleNonce,
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_filter_products',
+            _wpnonce: dekAdmin.toggleNonce,
             connect_id: connectId,
             target_id: targetId,
             category_id: categoryId,
@@ -258,9 +258,9 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             wpbShowSkeletons($productsContainer, skeletonCols);
         }
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_filter_products',
-            _wpnonce: wpbAdmin.toggleNonce,
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_filter_products',
+            _wpnonce: dekAdmin.toggleNonce,
             connect_id: connectId,
             target_id: targetId,
             category_id: 0,
@@ -423,9 +423,9 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
         $loading.addClass('wpb-active');
         positionSearchPopup($container, $popup);
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_search_products',
-            _wpnonce: wpbAdmin.toggleNonce,
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_search_products',
+            _wpnonce: dekAdmin.toggleNonce,
             term: term,
             per_page: perPage,
             show_image: showImage,
@@ -558,9 +558,9 @@ var addedText = $grid.data('addedButtonText') || wpbAdmin.addedText;
             wpbShowSkeletons($productsContainer, skeletonCols);
         }
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_filter_products',
-            _wpnonce: wpbAdmin.toggleNonce,
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_filter_products',
+            _wpnonce: dekAdmin.toggleNonce,
             connect_id: connectId,
             target_id: targetId,
             category_id: 0,

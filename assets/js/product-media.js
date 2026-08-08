@@ -138,6 +138,6 @@
     }
 
     if (window.jQuery) {
-        jQuery(document).on('wpb_content_updated', initProductMedia);
+        jQuery(document).on('dek_content_updated', initProductMedia);
     }
 })();

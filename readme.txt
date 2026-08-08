@@ -1,18 +1,18 @@
-=== WooCommerce Page Builder ===
+=== Dynamic ElementKit ===
 Contributors: mdrahimapurbo
 Tags: woocommerce, elementor, page builder, ecommerce, shop
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Elementor-powered WooCommerce page builder for custom product and shop page designs.
+Elementor-powered WooCommerce toolkit for dynamic product, shop, cart, checkout, and order-confirmation page designs.
 
 == Description ==
 
-WooCommerce Page Builder is a powerful plugin that integrates Elementor with WooCommerce, allowing you to create stunning custom shop pages, product grids, and product sliders using Elementor's drag-and-drop interface.
+Dynamic ElementKit is a powerful plugin that integrates Elementor with WooCommerce, allowing you to create stunning custom shop pages, product grids, and product sliders using Elementor's drag-and-drop interface.
 
 = Key Features =
 
@@ -20,10 +20,11 @@ WooCommerce Page Builder is a powerful plugin that integrates Elementor with Woo
 * **Product Grid Widget** - Display products in beautiful grid layouts
 * **Product Slider Widget** - Create responsive product carousels
 * **Shop Page Builder** - Customize your entire shop page with Elementor
-* **Social Authentication** - Google and Facebook login support
-* **Pre-built Templates** - Ready-to-use templates for quick setup
-* **GitHub Integration** - Update directly from your repository
-* **WooCommerce Compatible** - Works with all WooCommerce themes
+* **Cart and Checkout Widgets** - Build custom purchase flows with Elementor
+* **Single Product Widgets** - Add product title, price, rating, metadata, tabs, and purchase controls
+* **Dynamic Product Tags** - Use WooCommerce product data in Elementor content
+* **Template Management** - Create and activate WooCommerce templates from the dashboard
+* **WooCommerce Compatible** - Works with WooCommerce-compatible themes
 
 = Requirements =
 
@@ -35,8 +36,8 @@ WooCommerce Page Builder is a powerful plugin that integrates Elementor with Woo
 = How It Works =
 
 1. Install and activate the plugin
-2. Go to WC Page Builder in your WordPress dashboard
-3. Configure your license and authentication settings
+2. Go to Dynamic ElementKit in your WordPress dashboard
+3. Create or activate a WooCommerce template
 4. Start building your custom WooCommerce pages with Elementor widgets
 
 == Installation ==
@@ -45,7 +46,7 @@ WooCommerce Page Builder is a powerful plugin that integrates Elementor with Woo
 
 1. Log in to your WordPress dashboard
 2. Navigate to Plugins > Add New
-3. Search for "WooCommerce Page Builder"
+3. Search for "Dynamic ElementKit"
 4. Click "Install Now" and then "Activate"
 
 = Manual Installation =
@@ -58,14 +59,14 @@ WooCommerce Page Builder is a powerful plugin that integrates Elementor with Woo
 = From GitHub =
 
 1. Clone or download the repository
-2. Upload the `woocommerce-page-builder` folder to `/wp-content/plugins/`
+2. Upload the `dynamic-elementkit` folder to `/wp-content/plugins/`
 3. Activate the plugin through the 'Plugins' screen in WordPress
 
 == Frequently Asked Questions ==
 
 = Does this plugin work with any theme? =
 
-Yes, WooCommerce Page Builder works with any theme that is compatible with WooCommerce and Elementor.
+Yes, Dynamic ElementKit works with any theme that is compatible with WooCommerce and Elementor.
 
 = Is Elementor required? =
 
@@ -81,14 +82,41 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release
-* Product Grid widget
-* Product Slider widget
-* Shop Page Builder widget
-* Social authentication (Google, Facebook)
-* GitHub integration for updates
-* License key management
+= 2.1.4 =
+* Expanded templates beyond WooCommerce with General Page, Site Header, Site Footer, and Landing Page types
+* Added site-wide Elementor header and footer rendering
+* Updated the dashboard UI and copy for general WordPress website design
+
+= 2.1.3 =
+* Added product assignment for landing templates
+* Connected assigned products to single-product widgets, checkout, and product dynamic tags
+
+= 2.1.2 =
+* Added public `/landing/{slug}/` URLs for published templates
+* Added landing URL links to the template table
+* Added automatic rewrite refresh after upgrade
+
+= 2.1.1 =
+* Added template slug creation
+* Redirected new templates directly to the Elementor editor
+* Added Elementor custom-post-type support for Dynamic ElementKit templates
+
+= 2.1.0 =
+* Refreshed and standardized the admin branding
+* Added the Dynamic ElementKit Dashboard landing page
+* Added Dashboard, Templates, and Settings admin navigation
+* Added an option to enable or disable the landing page
+
+= 2.0.1 =
+* Added CSRF protection to custom checkout AJAX requests
+* Restricted watermark uploads to validated image files below 2 MB
+* Added security deployment guidance
+
+= 2.0.0 =
+* Rebranded and reorganized as Dynamic ElementKit
+* Added a structured `src/Elementor` code layout
+* Preserved legacy Elementor widget identifiers for existing pages
+* Added migration support for legacy template post types
 
 == Upgrade Notice ==
 
@@ -101,12 +129,12 @@ Coming soon.
 
 == Documentation ==
 
-For detailed documentation, visit our [GitHub repository](https://github.com/yourusername/woocommerce-page-builder).
+For detailed documentation, visit our [GitHub repository](https://github.com/mdrahimapurbo/dynamic-elementkit).
 
 == Support ==
 
-For support, please visit our [GitHub Issues page](https://github.com/yourusername/woocommerce-page-builder/issues).
+For support, please visit our [GitHub Issues page](https://github.com/mdrahimapurbo/dynamic-elementkit/issues).
 
 == Contributing ==
 
-We welcome contributions! Please feel free to submit issues and pull requests on our [GitHub repository](https://github.com/yourusername/woocommerce-page-builder).
+We welcome contributions! Please feel free to submit issues and pull requests on our [GitHub repository](https://github.com/mdrahimapurbo/dynamic-elementkit).

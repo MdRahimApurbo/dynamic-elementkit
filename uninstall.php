@@ -2,7 +2,7 @@
 /**
  * Fired when the plugin is uninstalled.
  *
- * @link       https://github.com/yourusername/woocommerce-page-builder
+ * @link       https://github.com/mdrahimapurbo/dynamic-elementkit
  * @since      1.0.0
  */
 
@@ -12,21 +12,21 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 }
 
 // Delete plugin options
-delete_option('wpb_license_key');
-delete_option('wpb_github_url');
-delete_option('wpb_enable_authentication');
-delete_option('wpb_google_client_id');
-delete_option('wpb_google_client_secret');
-delete_option('wpb_facebook_app_id');
-delete_option('wpb_facebook_app_secret');
+delete_option('dek_license_key');
+delete_option('dek_github_url');
+delete_option('dek_enable_authentication');
+delete_option('dek_google_client_id');
+delete_option('dek_google_client_secret');
+delete_option('dek_facebook_app_id');
+delete_option('dek_facebook_app_secret');
 
 // Delete page designs
 global $wpdb;
-$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'wpb_page_design_%'");
+$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'dek_page_design_%'");
 
 // Delete custom post types (templates)
 $templates = get_posts(array(
-    'post_type' => 'wpb_template',
+    'post_type' => 'dek_template',
     'posts_per_page' => -1,
     'post_status' => 'any',
 ));

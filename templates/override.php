@@ -1,11 +1,11 @@
 <?php
 defined('ABSPATH') || exit;
 
-global $wpb_active_template;
+global $dek_active_template;
 
-if ($wpb_active_template && isset($wpb_active_template->post_content)) {
-    add_filter('body_class', function($classes) use ($wpb_active_template) {
-        $template_id = (int) $wpb_active_template->ID;
+if ($dek_active_template && isset($dek_active_template->post_content)) {
+    add_filter('body_class', function($classes) use ($dek_active_template) {
+        $template_id = (int) $dek_active_template->ID;
         if ($template_id) {
             $classes[] = 'elementor-page';
             $classes[] = 'elementor-page-' . $template_id;
@@ -16,9 +16,9 @@ if ($wpb_active_template && isset($wpb_active_template->post_content)) {
 
 get_header();
 
-if ($wpb_active_template && isset($wpb_active_template->post_content)) {
+if ($dek_active_template && isset($dek_active_template->post_content)) {
     if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->frontend) {
-        $template_id = (int) $wpb_active_template->ID;
+        $template_id = (int) $dek_active_template->ID;
         $template_post = get_post($template_id);
         if ($template_post) {
             setup_postdata($template_post);
@@ -28,7 +28,7 @@ if ($wpb_active_template && isset($wpb_active_template->post_content)) {
             wp_reset_postdata();
         }
     } else {
-        echo apply_filters('the_content', $wpb_active_template->post_content);
+        echo apply_filters('the_content', $dek_active_template->post_content);
     }
 } elseif (function_exists('woocommerce_content')) {
     woocommerce_content();

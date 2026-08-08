@@ -4,12 +4,24 @@ jQuery(document).ready(function($) {
 
     function openModal() {
         $overlay.css('display', 'flex');
-        $('#wpb_template_name').focus();
+        $('#dek_template_name').focus();
     }
+
+    $('#dek_template_name').on('input', function() {
+        var $slug = $('#dek_template_slug');
+        if (!$slug.data('edited')) {
+            $slug.val($(this).val().toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+        }
+    });
+
+    $(document).on('input', '#dek_template_slug', function() {
+        $(this).data('edited', true);
+    });
 
     function closeModal() {
         $overlay.hide();
         $form[0].reset();
+        $('#dek_template_slug').removeData('edited');
     }
 
     $('#wpb-add-new-template-top, #wpb-add-new-template').on('click', function(e) {
@@ -31,10 +43,10 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var $checkbox = $(this);
         var postId = $checkbox.data('id');
-        var nonce = wpbAdmin.toggleNonce;
+        var nonce = dekAdmin.toggleNonce;
 
-        $.post(wpbAdmin.ajaxUrl, {
-            action: 'wpb_toggle_active',
+        $.post(dekAdmin.ajaxUrl, {
+            action: 'dek_toggle_active',
             post_id: postId,
             _wpnonce: nonce
         })
@@ -49,10 +61,10 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.submitdelete', function(e) {
-        if (!confirm(wpbAdmin.strings.confirmDelete)) {
+        if (!confirm(dekAdmin.strings.confirmDelete)) {
             e.preventDefault();
         }
     });
 
-    $('form[action*="edit.php"]').attr('action', wpbAdmin.formAction);
+    $('form[action*="edit.php"]').attr('action', dekAdmin.formAction);
 });

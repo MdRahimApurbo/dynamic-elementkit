@@ -1,0 +1,7 @@
+# Local/generated packaging artifacts
+build/
+build-*/
+*.zip
+
+# OS/editor artifacts
+.DS_Store

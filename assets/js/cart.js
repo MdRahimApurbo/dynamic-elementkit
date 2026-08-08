@@ -1,13 +1,13 @@
 jQuery(document).ready(function($) {
 
     function refreshCart($cart) {
-        var ajaxUrl = typeof wpbAdmin !== 'undefined' ? wpbAdmin.ajaxUrl : '';
+        var ajaxUrl = typeof dekAdmin !== 'undefined' ? dekAdmin.ajaxUrl : '';
         if (!ajaxUrl) return;
 
-        var nonce = $cart.data('nonce') || (typeof wpbAdmin !== 'undefined' ? wpbAdmin.toggleNonce : '');
+        var nonce = $cart.data('nonce') || (typeof dekAdmin !== 'undefined' ? dekAdmin.toggleNonce : '');
 
         $.post(ajaxUrl, {
-            action: 'wpb_get_cart_fragments',
+            action: 'dek_get_cart_fragments',
             _wpnonce: nonce,
             empty_text: $cart.data('empty-text') || '',
             continue_text: $cart.data('continue-text') || '',
@@ -111,11 +111,11 @@ jQuery(document).ready(function($) {
 
         $item.css('opacity', '.5');
 
-        var ajaxUrl = typeof wpbAdmin !== 'undefined' ? wpbAdmin.ajaxUrl : '';
-        var nonce = $cart.data('nonce') || (typeof wpbAdmin !== 'undefined' ? wpbAdmin.toggleNonce : '');
+        var ajaxUrl = typeof dekAdmin !== 'undefined' ? dekAdmin.ajaxUrl : '';
+        var nonce = $cart.data('nonce') || (typeof dekAdmin !== 'undefined' ? dekAdmin.toggleNonce : '');
 
         $.post(ajaxUrl, {
-            action: 'wpb_cart_remove_item',
+            action: 'dek_cart_remove_item',
             cart_item_key: key,
             _wpnonce: nonce
         })
@@ -139,8 +139,8 @@ jQuery(document).ready(function($) {
     // Sync cross-widget count after any add-to-cart
     $(document).ajaxComplete(function(event, xhr, settings) {
         if (settings && settings.data && typeof settings.data === 'string' &&
-            (settings.data.indexOf('wpb_add_to_cart') !== -1 ||
-             settings.data.indexOf('wpb_update_cart_quantity') !== -1)) {
+            (settings.data.indexOf('dek_add_to_cart') !== -1 ||
+             settings.data.indexOf('dek_update_cart_quantity') !== -1)) {
             $('.wpb-cart').each(function() {
                 refreshCart($(this));
             });
