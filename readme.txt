@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.7 =
+* Allow authenticated Elementor previews for auto-draft templates.
+
 = 2.2.6 =
 * Moved frontend template rendering into a dedicated modular renderer class
 * Reduced `templates/override.php` to a safe, minimal entry point
