@@ -381,9 +381,9 @@ input:checked + .wpb-slider:before {
 
 /* Wrap */
 .wrap.wpb-wrap {
-    width: 100%;
+    width: auto;
     max-width: none;
-    margin: 20px 0 0 0;
+    margin: 20px 20px 0 0;
     padding: 0;
 }
 
@@ -393,6 +393,12 @@ input:checked + .wpb-slider:before {
 
 .wrap.wpb-wrap .tablenav.top {
     width: 100%;
+}
+
+@media (max-width: 782px) {
+    .wrap.wpb-wrap {
+        margin-right: 10px;
+    }
 }
 
 /* Elementor Edit Button */

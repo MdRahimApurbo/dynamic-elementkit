@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.3 =
+* Restored standard right-side spacing for template and landing-page tables
+
 = 2.2.2 =
 * Restricted public URLs to Landing Pages only; headers, footers, and templates no longer use `/landing/`
 * Removed the URL column from the generic Templates screen
