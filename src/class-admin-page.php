@@ -392,15 +392,9 @@ class DEK_Admin {
         $list_table = new DEK_Template_Table('landing');
         $list_table->prepare_items();
         ?>
-        <div class="wrap wpb-wrap dek-admin-page">
-            <div class="dek-page-heading">
-                <div>
-                    <span class="dek-dashboard-eyebrow"><?php esc_html_e('Dynamic ElementKit', 'dynamic-elementkit'); ?></span>
-                    <h1 class="wp-heading-inline"><?php esc_html_e('Landing Pages', 'dynamic-elementkit'); ?></h1>
-                    <p class="dek-page-description"><?php esc_html_e('Create focused Elementor pages with a public /landing/ URL and an optional WooCommerce product context.', 'dynamic-elementkit'); ?></p>
-                </div>
-                <a href="#" class="button button-primary dek-primary-button" id="wpb-add-new-landing-top"><?php esc_html_e('Add Landing Page', 'dynamic-elementkit'); ?></a>
-            </div>
+        <div class="wrap wpb-wrap">
+            <h1 class="wp-heading-inline"><?php esc_html_e('Landing Pages', 'dynamic-elementkit'); ?></h1>
+            <a href="#" class="page-title-action" id="wpb-add-new-landing-top"><?php esc_html_e('Add Landing Page', 'dynamic-elementkit'); ?></a>
             <hr class="wp-header-end">
             <form id="wpb-templates-filter" method="get" style="margin: 10px 0;">
                 <input type="hidden" name="page" value="dek-landing-pages" />
