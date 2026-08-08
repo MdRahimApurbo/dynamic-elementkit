@@ -31,6 +31,14 @@ class DEK_Elementor_Widgets {
     }
 
     public function register_widgets($widgets_manager) {
+        require_once DEK_PLUGIN_PATH . 'src/Elementor/Widgets/site-logo.php';
+        if (class_exists('DEK_Site_Logo_Widget')) {
+            $widgets_manager->register(new DEK_Site_Logo_Widget());
+        }
+        require_once DEK_PLUGIN_PATH . 'src/Elementor/Widgets/navigation-menu.php';
+        if (class_exists('DEK_Navigation_Menu_Widget')) {
+            $widgets_manager->register(new DEK_Navigation_Menu_Widget());
+        }
         require_once DEK_PLUGIN_PATH . 'src/Elementor/Widgets/archive-title.php';
         if (class_exists('DEK_Archive_Title_Widget')) {
             $widgets_manager->register(new DEK_Archive_Title_Widget());

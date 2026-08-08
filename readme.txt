@@ -82,6 +82,11 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.4.0 =
+* Added a dynamic Elementor Site Logo widget.
+* Added a responsive Navigation Menu widget with a mobile hamburger drawer.
+* Added accessible close, outside-click, Escape-key, focus-trap, and scroll-lock behavior.
+
 = 2.3.0 =
 * Register active Elementor Header and Footer documents before frontend styles are printed.
 * Automatically restore missing Elementor atomic CSS for site-wide templates.

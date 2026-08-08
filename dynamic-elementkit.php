@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.3.0
+ * Version: 2.4.0
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.3.0');
+define('DEK_VERSION', '2.4.0');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -2730,6 +2730,11 @@ class Dynamic_ElementKit {
 
 
     public function enqueue_frontend_assets() {
+
+        $site_header_css_version = file_exists(DEK_PLUGIN_PATH . 'assets/css/site-header.css') ? filemtime(DEK_PLUGIN_PATH . 'assets/css/site-header.css') : DEK_VERSION;
+        $site_header_js_version = file_exists(DEK_PLUGIN_PATH . 'assets/js/navigation-menu.js') ? filemtime(DEK_PLUGIN_PATH . 'assets/js/navigation-menu.js') : DEK_VERSION;
+        wp_register_style('dek-site-header', DEK_PLUGIN_URL . 'assets/css/site-header.css', [], $site_header_css_version);
+        wp_register_script('dek-navigation-menu', DEK_PLUGIN_URL . 'assets/js/navigation-menu.js', [], $site_header_js_version, true);
 
         $embla_version = '8.0.1';
 
