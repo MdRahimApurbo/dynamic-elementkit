@@ -2,25 +2,25 @@
 
 /* Dashboard */
 .dek-dashboard {
-    max-width: 1180px;
-    margin-top: 28px;
+    max-width: 1280px;
+    margin-top: 20px;
 }
 
 .dek-dashboard-hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 32px;
-    padding: 42px 48px;
+    gap: 28px;
+    padding: 34px 40px;
     color: #fff;
     background: linear-gradient(135deg, #172554, #2563eb 58%, #38bdf8);
-    border-radius: 18px;
-    box-shadow: 0 18px 45px rgba(30, 64, 175, .2);
+    border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(30, 64, 175, .18);
 }
 
 .dek-dashboard-eyebrow {
     display: inline-block;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .14em;
@@ -29,10 +29,10 @@
 }
 
 .dek-dashboard-hero h1 {
-    max-width: 650px;
-    margin: 0 0 12px;
+    max-width: 700px;
+    margin: 0 0 10px;
     color: inherit;
-    font-size: clamp(28px, 4vw, 46px);
+    font-size: clamp(28px, 3vw, 40px);
     line-height: 1.08;
 }
 
@@ -40,19 +40,54 @@
     max-width: 650px;
     margin: 0;
     color: rgba(255, 255, 255, .82);
-    font-size: 16px;
+    font-size: 15px;
+}
+
+.dek-dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.dek-dashboard-actions .button {
+    min-height: 36px;
+    padding: 4px 14px;
+    border-color: rgba(255, 255, 255, .72);
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+}
+
+.dek-dashboard-actions .button:hover,
+.dek-dashboard-actions .button:focus {
+    border-color: #fff;
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
+}
+
+.dek-dashboard-actions .button.button-primary {
+    border-color: #fff;
+    background: #fff;
+    color: #1d4ed8;
+    box-shadow: none;
+}
+
+.dek-dashboard-actions .button.button-primary:hover,
+.dek-dashboard-actions .button.button-primary:focus {
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .dek-dashboard-mark {
     display: grid;
-    width: 112px;
-    height: 112px;
-    flex: 0 0 112px;
+    width: 100px;
+    height: 100px;
+    flex: 0 0 100px;
     place-items: center;
     color: #172554;
     background: #fff;
-    border-radius: 30px;
-    font-size: 24px;
+    border-radius: 26px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: .08em;
     transform: rotate(6deg);
@@ -60,21 +95,43 @@
 
 .dek-dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    margin-top: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.dek-dashboard-section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 26px;
+}
+
+.dek-dashboard-section-heading h2,
+.dek-dashboard-section-heading p {
+    margin: 0;
+}
+
+.dek-dashboard-section-heading h2 {
+    color: #1d2939;
+    font-size: 16px;
+}
+
+.dek-dashboard-section-heading p {
+    color: #667085;
+    font-size: 13px;
 }
 
 .dek-dashboard-card {
     display: flex;
-    min-height: 150px;
+    min-height: 116px;
     flex-direction: column;
     gap: 9px;
-    padding: 24px;
+    padding: 20px;
     color: #172033;
     background: #fff;
     border: 1px solid #dbe4f0;
-    border-radius: 14px;
+    border-radius: 10px;
     box-shadow: 0 5px 18px rgba(15, 23, 42, .05);
     text-decoration: none;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -90,7 +147,7 @@
 
 .dek-dashboard-card .dashicons {
     color: #2563eb;
-    font-size: 27px;
+    font-size: 24px;
 }
 
 .dek-dashboard-card strong {
@@ -107,11 +164,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    margin-top: 22px;
-    padding: 22px 24px;
+    margin-top: 18px;
+    padding: 18px 20px;
     background: #fff;
     border: 1px solid #dbe4f0;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 .dek-dashboard-panel h2,
@@ -377,8 +434,7 @@ input:checked + .wpb-slider:before {
     font-size: 14px;
 }
 
-.dek-primary-button,
-.dek-dashboard .button-primary {
+.dek-primary-button {
     min-height: 40px;
     padding: 7px 18px !important;
     border: 0 !important;
@@ -389,8 +445,7 @@ input:checked + .wpb-slider:before {
     font-weight: 600;
 }
 
-.dek-primary-button:hover,
-.dek-dashboard .button-primary:hover {
+.dek-primary-button:hover {
     background: linear-gradient(135deg, #244bd3, #1839aa) !important;
     color: #fff !important;
 }

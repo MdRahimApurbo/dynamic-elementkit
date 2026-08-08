@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.1 =
+* Refined the dashboard with balanced quick-access cards and clear primary actions
+
 = 2.2.0 =
 * Replaced the landing product dropdown with a memory-safe AJAX product search
 * Searches only matching products and limits each result set to 20 items

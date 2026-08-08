@@ -110,13 +110,21 @@ class DEK_Admin {
         <div class="wrap dek-dashboard">
             <div class="dek-dashboard-hero">
                 <div>
-                    <span class="dek-dashboard-eyebrow">Dynamic ElementKit</span>
-                    <h1><?php esc_html_e('Design every part of your website.', 'dynamic-elementkit'); ?></h1>
-                    <p><?php esc_html_e('Create Elementor pages, headers, footers, landing pages, and WooCommerce experiences from one organized workspace.', 'dynamic-elementkit'); ?></p>
+                    <span class="dek-dashboard-eyebrow"><?php esc_html_e('Dynamic ElementKit', 'dynamic-elementkit'); ?></span>
+                    <h1><?php esc_html_e('Your website design workspace.', 'dynamic-elementkit'); ?></h1>
+                    <p><?php esc_html_e('Build templates, landing pages, headers, footers, and WooCommerce layouts with Elementor.', 'dynamic-elementkit'); ?></p>
+                    <div class="dek-dashboard-actions">
+                        <a class="button button-primary" href="<?php echo esc_url($template_url); ?>"><?php esc_html_e('Manage Templates', 'dynamic-elementkit'); ?></a>
+                        <a class="button" href="<?php echo esc_url($landing_url); ?>"><?php esc_html_e('Create Landing Page', 'dynamic-elementkit'); ?></a>
+                    </div>
                 </div>
                 <span class="dek-dashboard-mark" aria-hidden="true">DEK</span>
             </div>
 
+            <div class="dek-dashboard-section-heading">
+                <h2><?php esc_html_e('Quick access', 'dynamic-elementkit'); ?></h2>
+                <p><?php esc_html_e('Choose what you want to design or configure.', 'dynamic-elementkit'); ?></p>
+            </div>
             <div class="dek-dashboard-grid">
                 <a class="dek-dashboard-card" href="<?php echo esc_url($template_url); ?>">
                     <span class="dashicons dashicons-layout" aria-hidden="true"></span>
