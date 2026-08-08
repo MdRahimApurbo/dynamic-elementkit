@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.2.7
+ * Version: 2.2.8
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.2.7');
+define('DEK_VERSION', '2.2.8');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -2437,7 +2437,12 @@ add_action('wp_enqueue_scripts', 'dek_enqueue_elementor_template_styles', PHP_IN
  * Override WooCommerce templates
  */
 add_filter('template_include', function($template) {
-    $active_template = dek_get_current_landing_template() ?: dek_get_current_editor_template() ?: dek_get_current_active_template();
+    $editor_template = dek_get_current_editor_template();
+    if ($editor_template) {
+        return DEK_PLUGIN_PATH . 'templates/elementor-preview.php';
+    }
+
+    $active_template = dek_get_current_landing_template() ?: dek_get_current_active_template();
     if (!$active_template) {
         return $template;
     }

@@ -82,6 +82,11 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.8 =
+* Route Elementor template previews through a private editor-only URL.
+* Bind Elementor preview requests to the requested Dynamic ElementKit template.
+* Render editor previews through a complete, theme-independent HTML document.
+
 = 2.2.7 =
 * Allow authenticated Elementor previews for auto-draft templates.
 
