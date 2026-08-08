@@ -82,6 +82,10 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.9 =
+* Automatically regenerate missing Elementor 4 atomic preview CSS files.
+* Disable browser caching for authenticated template preview responses.
+
 = 2.2.8 =
 * Route Elementor template previews through a private editor-only URL.
 * Bind Elementor preview requests to the requested Dynamic ElementKit template.

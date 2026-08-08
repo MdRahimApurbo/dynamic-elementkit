@@ -29,6 +29,9 @@ final class DEK_Elementor_Preview_Router {
         $query_vars['post_type'] = 'dek_template';
         $query_vars['p'] = (int) $template->ID;
 
+        nocache_headers();
+        self::refresh_missing_atomic_css((int) $template->ID);
+
         return $query_vars;
     }
 
@@ -72,5 +75,29 @@ final class DEK_Elementor_Preview_Router {
         }
 
         return $template;
+    }
+
+    /**
+     * Elementor 4 can retain valid atomic-style metadata after the generated
+     * file has been removed. Invalidate only missing editor CSS branches so
+     * Elementor recreates them during its normal enqueue pass.
+     */
+    private static function refresh_missing_atomic_css($template_id) {
+        $upload_dir = wp_upload_dir();
+        if (!empty($upload_dir['error']) || empty($upload_dir['basedir'])) {
+            return;
+        }
+
+        $css_dir = trailingslashit($upload_dir['basedir']) . 'elementor/css/';
+        $base_css = $css_dir . 'base-desktop.css';
+        $template_css = $css_dir . 'local-' . $template_id . '-preview-desktop.css';
+
+        if (!file_exists($base_css)) {
+            do_action('elementor/atomic-widgets/styles/clear', ['base']);
+        }
+
+        if (!file_exists($template_css)) {
+            do_action('elementor/atomic-widgets/styles/clear', ['local', $template_id, 'preview']);
+        }
     }
 }
