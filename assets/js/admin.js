@@ -22,6 +22,9 @@ jQuery(document).ready(function($) {
         $overlay.hide();
         $form[0].reset();
         $('#dek_template_slug').removeData('edited');
+        $('#dek_landing_product_id').val(0);
+        $('#dek_landing_product_selected').text('No product assigned');
+        $('#dek_landing_product_results').empty().prop('hidden', true);
     }
 
     $('#wpb-add-new-template-top, #wpb-add-new-template, #wpb-add-new-landing-top').on('click', function(e) {
@@ -37,6 +40,55 @@ jQuery(document).ready(function($) {
         if ($(e.target).is('#wpb-modal-overlay')) {
             closeModal();
         }
+    });
+
+    var productSearchTimer;
+    $(document).on('input', '#dek_landing_product_search', function() {
+        var $input = $(this);
+        var term = $input.val().trim();
+        var $results = $('#dek_landing_product_results');
+
+        clearTimeout(productSearchTimer);
+        $('#dek_landing_product_id').val(0);
+        $('#dek_landing_product_selected').text('No product assigned');
+
+        if (term.length < 2) {
+            $results.empty().prop('hidden', true);
+            return;
+        }
+
+        productSearchTimer = setTimeout(function() {
+            $.get(dekAdmin.ajaxUrl, {
+                action: 'dek_search_landing_products',
+                nonce: dekAdmin.productSearchNonce,
+                term: term
+            }).done(function(response) {
+                $results.empty();
+                if (!response.success || !response.data.length) {
+                    $('<div/>', { 'class': 'dek-product-search-empty', text: 'No matching products found.' }).appendTo($results);
+                    $results.prop('hidden', false);
+                    return;
+                }
+
+                $.each(response.data, function(_, product) {
+                    $('<button/>', {
+                        type: 'button',
+                        'class': 'dek-product-search-option',
+                        'data-product-id': product.id,
+                        text: product.text
+                    }).appendTo($results);
+                });
+                $results.prop('hidden', false);
+            });
+        }, 250);
+    });
+
+    $(document).on('click', '.dek-product-search-option', function() {
+        var $option = $(this);
+        $('#dek_landing_product_id').val($option.data('product-id'));
+        $('#dek_landing_product_search').val($option.text());
+        $('#dek_landing_product_selected').text('Selected: ' + $option.text());
+        $('#dek_landing_product_results').empty().prop('hidden', true);
     });
 
     $(document).on('click', '.wpb-toggle-active', function(e) {

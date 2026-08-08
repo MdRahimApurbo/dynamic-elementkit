@@ -491,6 +491,71 @@ input:checked + .wpb-slider:before {
     box-shadow: 0 0 0 3px rgba(49, 91, 234, .14);
 }
 
+.dek-product-search {
+    position: relative;
+}
+
+.wpb-modal-body input[type="search"] {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #d0d5dd;
+    border-radius: 7px;
+    box-shadow: none;
+}
+
+.wpb-modal-body input[type="search"]:focus {
+    border-color: #315bea;
+    box-shadow: 0 0 0 3px rgba(49, 91, 234, .14);
+}
+
+.dek-product-search-results {
+    position: absolute;
+    z-index: 2;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    overflow-y: auto;
+    max-height: 240px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 7px;
+    box-shadow: 0 10px 24px rgba(16, 24, 40, .14);
+}
+
+.dek-product-search-option,
+.dek-product-search-empty {
+    display: block;
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #344054;
+    font: inherit;
+    text-align: left;
+}
+
+.dek-product-search-option {
+    cursor: pointer;
+}
+
+.dek-product-search-option:hover,
+.dek-product-search-option:focus {
+    background: #eff4ff;
+    color: #1849a9;
+}
+
+.dek-product-search-empty {
+    color: #667085;
+}
+
+.dek-product-search-selected {
+    margin: 7px 0 0;
+    color: #475467;
+    font-size: 12px;
+}
+
 .wpb-modal-footer {
     padding: 18px 26px 24px;
     border-color: #eaecf0;

@@ -24,6 +24,7 @@ class DEK_Admin {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         add_action('admin_post_dek_create_template', [$this, 'handle_create_template']);
         add_action('admin_post_dek_create_landing', [$this, 'handle_create_landing']);
+        add_action('wp_ajax_dek_search_landing_products', [$this, 'search_landing_products']);
         add_action('admin_post_dek_toggle_active', [$this, 'handle_toggle_active']);
         add_action('trashed_post', [$this, 'redirect_after_trash']);
         add_action('manage_dek_template_posts_columns', [$this, 'set_custom_columns']);
@@ -319,6 +320,7 @@ class DEK_Admin {
 
         wp_localize_script('wpb-admin', 'dekAdmin', [
             'toggleNonce' => wp_create_nonce('dek_toggle_active'),
+            'productSearchNonce' => wp_create_nonce('dek_search_landing_products'),
             'ajaxUrl'     => admin_url('admin-ajax.php'),
             'formAction'  => admin_url('admin.php?page=dek-templates'),
             'strings'     => [
@@ -328,6 +330,38 @@ class DEK_Admin {
                 'typeRequired'   => __('Please select a template type.', 'dynamic-elementkit'),
             ],
         ]);
+    }
+
+    public function search_landing_products() {
+        check_ajax_referer('dek_search_landing_products', 'nonce');
+
+        if (!current_user_can('manage_options') || !function_exists('wc_get_products')) {
+            wp_send_json_error(['message' => __('Permission denied.', 'dynamic-elementkit')], 403);
+        }
+
+        $term = isset($_GET['term']) ? sanitize_text_field(wp_unslash($_GET['term'])) : '';
+        if (strlen($term) < 2) {
+            wp_send_json_success([]);
+        }
+
+        $products = wc_get_products([
+            'limit'   => 20,
+            'status'  => 'publish',
+            'search'  => '*' . $term . '*',
+            'orderby' => 'title',
+            'order'   => 'ASC',
+            'return'  => 'objects',
+        ]);
+
+        $results = [];
+        foreach ($products as $product) {
+            $results[] = [
+                'id'   => $product->get_id(),
+                'text' => sprintf('%s (#%d)', $product->get_name(), $product->get_id()),
+            ];
+        }
+
+        wp_send_json_success($results);
     }
 
     public function render_page_builder() {
@@ -736,27 +770,13 @@ class DEK_Admin {
                             <tr>
                                 <th scope="row"><label for="dek_landing_product_id"><?php _e('Landing product', 'dynamic-elementkit'); ?></label></th>
                                 <td>
-                                    <select id="dek_landing_product_id" name="dek_landing_product_id" class="regular-text">
-                                        <option value="0"><?php _e('No assigned product', 'dynamic-elementkit'); ?></option>
-                                        <?php
-                                        if (function_exists('wc_get_products')) {
-                                            $landing_products = wc_get_products([
-                                                'limit' => 200,
-                                                'status' => 'publish',
-                                                'orderby' => 'title',
-                                                'order' => 'ASC',
-                                            ]);
-                                            foreach ($landing_products as $landing_product) {
-                                                printf(
-                                                    '<option value="%1$d">%2$s (#%1$d)</option>',
-                                                    absint($landing_product->get_id()),
-                                                    esc_html($landing_product->get_name())
-                                                );
-                                            }
-                                        }
-                                        ?>
-                                    </select>
-                                    <p class="description"><?php _e('Assign a product to this landing page. The Single Product widgets, Checkout Form set to Current Product, and Product dynamic tags will use it automatically.', 'dynamic-elementkit'); ?></p>
+                                    <input type="hidden" id="dek_landing_product_id" name="dek_landing_product_id" value="0" />
+                                    <div class="dek-product-search">
+                                        <input type="search" id="dek_landing_product_search" class="regular-text" autocomplete="off" placeholder="<?php esc_attr_e('Search products by name…', 'dynamic-elementkit'); ?>" />
+                                        <div id="dek_landing_product_results" class="dek-product-search-results" hidden></div>
+                                        <p id="dek_landing_product_selected" class="dek-product-search-selected"><?php esc_html_e('No product assigned', 'dynamic-elementkit'); ?></p>
+                                    </div>
+                                    <p class="description"><?php _e('Start typing to search. Only matching products are loaded. The selected product powers Single Product widgets, Current Product checkout, and Product dynamic tags.', 'dynamic-elementkit'); ?></p>
                                 </td>
                             </tr>
                             <?php endif; ?>

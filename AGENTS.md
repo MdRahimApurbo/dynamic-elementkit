@@ -27,6 +27,7 @@ Dynamic ElementKit is a WordPress plugin that adds Elementor widgets, dynamic ta
 - Published templates use the `dek_template` post type.
 - Public landing pages use `/landing/{slug}/`.
 - Landing templates may be assigned a WooCommerce product through `_dek_landing_product_id`.
+- Landing product assignment must use the AJAX search endpoint; do not preload the full product catalog into an admin form.
 - The assigned landing product must resolve consistently in single-product widgets, the checkout widget, and product dynamic tags.
 - Site headers and footers use the `header` and `footer` template types and render through `wp_body_open` and `wp_footer`.
 - Template creation must remain nonce-protected and restricted to administrators.
