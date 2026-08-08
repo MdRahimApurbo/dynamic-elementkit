@@ -3,41 +3,12 @@ defined('ABSPATH') || exit;
 
 global $dek_active_template;
 
-if ($dek_active_template && isset($dek_active_template->post_content)) {
-    add_filter('body_class', function($classes) use ($dek_active_template) {
-        $template_id = (int) $dek_active_template->ID;
-        if ($template_id) {
-            $classes[] = 'elementor-page';
-            $classes[] = 'elementor-page-' . $template_id;
-        }
-        return $classes;
-    });
-}
+require_once DEK_PLUGIN_PATH . 'src/Modules/Frontend/class-template-renderer.php';
 
-$is_elementor_preview = isset($_GET['elementor-preview']);
-
-if (!$is_elementor_preview) {
-    get_header();
-}
-
-if ($dek_active_template && isset($dek_active_template->post_content)) {
-    if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->frontend) {
-        $template_id = (int) $dek_active_template->ID;
-        $template_post = get_post($template_id);
-        if ($template_post) {
-            setup_postdata($template_post);
-        }
-        echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($template_id);
-        if ($template_post) {
-            wp_reset_postdata();
-        }
-    } else {
-        echo apply_filters('the_content', $dek_active_template->post_content);
-    }
+if ($dek_active_template instanceof \WP_Post) {
+    DEK_Template_Renderer::render($dek_active_template);
 } elseif (function_exists('woocommerce_content')) {
+    get_header();
     woocommerce_content();
-}
-
-if (!$is_elementor_preview) {
     get_footer();
 }
