@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.1.7 =
+* Moved Landing Pages to its own top-level WordPress admin menu
+
 = 2.1.6 =
 * Added a dedicated Landing Pages admin menu and creation flow
 * Removed product assignment from the generic template creator

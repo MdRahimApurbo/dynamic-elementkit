@@ -61,13 +61,14 @@ class DEK_Admin {
             [$this, 'render_page_builder']
         );
 
-        add_submenu_page(
-            'dynamic-elementkit',
+        add_menu_page(
             __('Landing Pages', 'dynamic-elementkit'),
             __('Landing Pages', 'dynamic-elementkit'),
             'manage_options',
             'dek-landing-pages',
-            [$this, 'render_landing_pages']
+            [$this, 'render_landing_pages'],
+            'dashicons-admin-site-alt3',
+            57
         );
     }
 
@@ -683,11 +684,11 @@ class DEK_Admin {
         $screen = get_current_screen();
         if (
             !$screen ||
-            !in_array($screen->id, ['toplevel_page_dynamic-elementkit', 'dynamic-elementkit_page_dek-templates', 'dynamic-elementkit_page_dek-landing-pages'], true)
+            !in_array($screen->id, ['toplevel_page_dynamic-elementkit', 'dynamic-elementkit_page_dek-templates', 'toplevel_page_dek-landing-pages'], true)
         ) {
             return;
         }
-        $is_landing_modal = 'dynamic-elementkit_page_dek-landing-pages' === $screen->id;
+        $is_landing_modal = 'toplevel_page_dek-landing-pages' === $screen->id;
         ?>
         <div id="wpb-modal-overlay" class="wpb-modal-overlay" style="display:none;">
             <div class="wpb-modal">
