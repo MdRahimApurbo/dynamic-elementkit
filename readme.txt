@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.1.9 =
+* Moved the separate Landing Pages menu directly below WordPress Pages
+
 = 2.1.8 =
 * Simplified the Landing Pages screen to use the standard WordPress page heading and action button
 

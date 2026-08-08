@@ -68,7 +68,7 @@ class DEK_Admin {
             'dek-landing-pages',
             [$this, 'render_landing_pages'],
             'dashicons-admin-site-alt3',
-            57
+            21
         );
     }
 

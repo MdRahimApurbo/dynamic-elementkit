@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.1.8
+ * Version: 2.1.9
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.1.8');
+define('DEK_VERSION', '2.1.9');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
