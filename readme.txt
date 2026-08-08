@@ -82,6 +82,9 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.4.1 =
+* Added a custom image upload source to the Site Logo Elementor widget.
+
 = 2.4.0 =
 * Added a dynamic Elementor Site Logo widget.
 * Added a responsive Navigation Menu widget with a mobile hamburger drawer.
