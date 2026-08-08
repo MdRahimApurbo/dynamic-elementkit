@@ -24,7 +24,7 @@ jQuery(document).ready(function($) {
         $('#dek_template_slug').removeData('edited');
     }
 
-    $('#wpb-add-new-template-top, #wpb-add-new-template').on('click', function(e) {
+    $('#wpb-add-new-template-top, #wpb-add-new-template, #wpb-add-new-landing-top').on('click', function(e) {
         e.preventDefault();
         openModal();
     });

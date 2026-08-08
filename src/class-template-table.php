@@ -7,7 +7,14 @@ if (!class_exists('WP_List_Table')) {
 
 class DEK_Template_Table extends WP_List_Table {
 
-    public function __construct() {
+    private $template_type = '';
+
+    private function get_admin_page() {
+        return 'landing' === $this->template_type ? 'dek-landing-pages' : 'dek-templates';
+    }
+
+    public function __construct($template_type = '') {
+        $this->template_type = sanitize_key($template_type);
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         $screen_id = $screen ? $screen->id : 'dynamic-elementkit_page_dek-templates';
         parent::__construct([
@@ -23,7 +30,7 @@ class DEK_Template_Table extends WP_List_Table {
             'cb'     => '<input type="checkbox" />',
             'name'   => __('Name', 'dynamic-elementkit'),
             'type'   => __('Type', 'dynamic-elementkit'),
-            'url'    => __('Landing URL', 'dynamic-elementkit'),
+            'url'    => __('Public URL', 'dynamic-elementkit'),
             'active' => __('Active', 'dynamic-elementkit'),
             'date'   => __('Date', 'dynamic-elementkit'),
         ];
@@ -88,6 +95,15 @@ class DEK_Template_Table extends WP_List_Table {
             's'              => $search,
         ];
 
+        if ($this->template_type) {
+            $args['meta_query'] = [
+                [
+                    'key'   => '_dek_template_type',
+                    'value' => $this->template_type,
+                ],
+            ];
+        }
+
         if ($post_status === 'all' || $post_status === '') {
             $args['post_status'] = ['publish', 'draft', 'pending', 'trash'];
         }
@@ -128,8 +144,9 @@ class DEK_Template_Table extends WP_List_Table {
             $actions['edit'] = sprintf('<a href="%s" aria-label="%s">%s</a>', esc_url($edit_url), esc_attr(sprintf(__('Edit &#8220;%s&#8221;', 'dynamic-elementkit'), $item->post_title)), __('Edit with Elementor', 'dynamic-elementkit'));
             $actions['trash'] = sprintf('<a href="%s" class="submitdelete" aria-label="%s">%s</a>', get_delete_post_link($item->ID), esc_attr(__('Move this item to the Trash', 'dynamic-elementkit')), __('Trash', 'dynamic-elementkit'));
         } else {
-            $actions['restore'] = sprintf('<a href="%s" aria-label="%s">%s</a>', wp_nonce_url(admin_url('admin.php?page=dek-templates&action=restore&post=' . $item->ID), 'dek_restore_template_' . $item->ID), esc_attr(__('Restore this item from the Trash', 'dynamic-elementkit')), __('Restore', 'dynamic-elementkit'));
-            $actions['delete'] = sprintf('<a href="%s" class="submitdelete" aria-label="%s">%s</a>', wp_nonce_url(admin_url('admin.php?page=dek-templates&action=delete&post=' . $item->ID), 'dek_delete_template_' . $item->ID), esc_attr(__('Delete this item permanently', 'dynamic-elementkit')), __('Delete Permanently', 'dynamic-elementkit'));
+            $page = $this->get_admin_page();
+            $actions['restore'] = sprintf('<a href="%s" aria-label="%s">%s</a>', wp_nonce_url(admin_url('admin.php?page=' . $page . '&action=restore&post=' . $item->ID), 'dek_restore_template_' . $item->ID), esc_attr(__('Restore this item from the Trash', 'dynamic-elementkit')), __('Restore', 'dynamic-elementkit'));
+            $actions['delete'] = sprintf('<a href="%s" class="submitdelete" aria-label="%s">%s</a>', wp_nonce_url(admin_url('admin.php?page=' . $page . '&action=delete&post=' . $item->ID), 'dek_delete_template_' . $item->ID), esc_attr(__('Delete this item permanently', 'dynamic-elementkit')), __('Delete Permanently', 'dynamic-elementkit'));
         }
 
         return $title . $this->row_actions($actions);
@@ -225,8 +242,9 @@ class DEK_Template_Table extends WP_List_Table {
 
     protected function display_tablenav($which) {
         if ('top' === $which) {
-            echo '<form id="wpb-templates-filter" method="get" action="' . esc_url(admin_url('admin.php?page=dek-templates')) . '">';
-            echo '<input type="hidden" name="page" value="dek-templates" />';
+            $page = $this->get_admin_page();
+            echo '<form id="wpb-templates-filter" method="get" action="' . esc_url(admin_url('admin.php?page=' . $page)) . '">';
+            echo '<input type="hidden" name="page" value="' . esc_attr($page) . '" />';
             if (isset($_REQUEST['post_status'])) {
                 echo '<input type="hidden" name="post_status" value="' . esc_attr($_REQUEST['post_status']) . '" />';
             }

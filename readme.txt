@@ -82,6 +82,11 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.1.6 =
+* Added a dedicated Landing Pages admin menu and creation flow
+* Removed product assignment from the generic template creator
+* Added consistent global admin buttons, fields, modal, and toggle styles
+
 = 2.1.5 =
 * Added modular Core, Admin, Assets, Elementor, Frontend, and WooCommerce module boundaries
 * Centralized module registration and compatibility loading

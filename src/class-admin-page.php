@@ -23,6 +23,7 @@ class DEK_Admin {
         add_action('admin_post_dek_save_watermark_settings', [$this, 'handle_save_watermark_settings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         add_action('admin_post_dek_create_template', [$this, 'handle_create_template']);
+        add_action('admin_post_dek_create_landing', [$this, 'handle_create_landing']);
         add_action('admin_post_dek_toggle_active', [$this, 'handle_toggle_active']);
         add_action('trashed_post', [$this, 'redirect_after_trash']);
         add_action('manage_dek_template_posts_columns', [$this, 'set_custom_columns']);
@@ -59,6 +60,15 @@ class DEK_Admin {
             'dek-templates',
             [$this, 'render_page_builder']
         );
+
+        add_submenu_page(
+            'dynamic-elementkit',
+            __('Landing Pages', 'dynamic-elementkit'),
+            __('Landing Pages', 'dynamic-elementkit'),
+            'manage_options',
+            'dek-landing-pages',
+            [$this, 'render_landing_pages']
+        );
     }
 
     public function add_settings_menu() {
@@ -91,6 +101,7 @@ class DEK_Admin {
         }
 
         $template_url = admin_url('admin.php?page=dek-templates');
+        $landing_url = admin_url('admin.php?page=dek-landing-pages');
         $settings_url = admin_url('admin.php?page=dek-settings');
         $shop_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/');
         ?>
@@ -114,6 +125,11 @@ class DEK_Admin {
                     <span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
                     <strong><?php esc_html_e('Plugin Settings', 'dynamic-elementkit'); ?></strong>
                     <span><?php esc_html_e('Configure branding, security, and dashboard options.', 'dynamic-elementkit'); ?></span>
+                </a>
+                <a class="dek-dashboard-card" href="<?php echo esc_url($landing_url); ?>">
+                    <span class="dashicons dashicons-admin-site-alt3" aria-hidden="true"></span>
+                    <strong><?php esc_html_e('Landing Pages', 'dynamic-elementkit'); ?></strong>
+                    <span><?php esc_html_e('Create campaign pages with their own public URL and product context.', 'dynamic-elementkit'); ?></span>
                 </a>
                 <a class="dek-dashboard-card" href="<?php echo esc_url($shop_url); ?>" target="_blank" rel="noopener">
                     <span class="dashicons dashicons-external" aria-hidden="true"></span>
@@ -173,9 +189,9 @@ class DEK_Admin {
                     <tr>
                         <th scope="row"><?php _e('Enable Watermark', 'dynamic-elementkit'); ?></th>
                         <td>
-                            <label class="wpb-switch">
+                            <label class="dek-toggle">
                                 <input type="checkbox" name="dek_watermark_enabled" value="1" <?php checked($enabled, 1); ?> />
-                                <span class="wpb-slider round"></span>
+                                <span class="dek-toggle-track" aria-hidden="true"></span>
                             </label>
                         </td>
                     </tr>
@@ -293,7 +309,7 @@ class DEK_Admin {
     }
 
     public function enqueue_admin_assets($hook) {
-        if (strpos($hook, 'dynamic-elementkit') === false && strpos($hook, 'dek-templates') === false) {
+        if (strpos($hook, 'dynamic-elementkit') === false && strpos($hook, 'dek-templates') === false && strpos($hook, 'dek-landing-pages') === false) {
             return;
         }
 
@@ -371,6 +387,29 @@ class DEK_Admin {
         <?php
     }
 
+    public function render_landing_pages() {
+        $list_table = new DEK_Template_Table('landing');
+        $list_table->prepare_items();
+        ?>
+        <div class="wrap wpb-wrap dek-admin-page">
+            <div class="dek-page-heading">
+                <div>
+                    <span class="dek-dashboard-eyebrow"><?php esc_html_e('Dynamic ElementKit', 'dynamic-elementkit'); ?></span>
+                    <h1 class="wp-heading-inline"><?php esc_html_e('Landing Pages', 'dynamic-elementkit'); ?></h1>
+                    <p class="dek-page-description"><?php esc_html_e('Create focused Elementor pages with a public /landing/ URL and an optional WooCommerce product context.', 'dynamic-elementkit'); ?></p>
+                </div>
+                <a href="#" class="button button-primary dek-primary-button" id="wpb-add-new-landing-top"><?php esc_html_e('Add Landing Page', 'dynamic-elementkit'); ?></a>
+            </div>
+            <hr class="wp-header-end">
+            <form id="wpb-templates-filter" method="get" style="margin: 10px 0;">
+                <input type="hidden" name="page" value="dek-landing-pages" />
+                <?php $list_table->search_box(__('Search Landing Pages', 'dynamic-elementkit'), 'dek_landing_search'); ?>
+            </form>
+            <?php $list_table->display(); ?>
+        </div>
+        <?php
+    }
+
     public function handle_create_template() {
         if (!isset($_POST['dek_create_nonce']) || !wp_verify_nonce($_POST['dek_create_nonce'], 'dek_create_template')) {
             wp_die(__('Security check failed', 'dynamic-elementkit'));
@@ -428,6 +467,12 @@ class DEK_Admin {
 
         wp_redirect(admin_url('post.php?post=' . absint($post_id) . '&action=elementor'));
         exit;
+    }
+
+    public function handle_create_landing() {
+        $_POST['action'] = 'dek_create_template';
+        $_POST['dek_template_type'] = 'landing';
+        $this->handle_create_template();
     }
 
     public function handle_toggle_active() {
@@ -602,9 +647,9 @@ class DEK_Admin {
             case 'dek_template_active':
                 $is_active = get_post_meta($post_id, '_dek_template_active', true);
                 $checked = $is_active ? 'checked' : '';
-                echo '<label class="wpb-switch">';
+                echo '<label class="dek-toggle">';
                 echo '<input type="checkbox" disabled ' . $checked . '>';
-                echo '<span class="wpb-slider round"></span>';
+                echo '<span class="dek-toggle-track" aria-hidden="true"></span>';
                 echo '</label>';
                 break;
         }
@@ -638,20 +683,21 @@ class DEK_Admin {
         $screen = get_current_screen();
         if (
             !$screen ||
-            !in_array($screen->id, ['toplevel_page_dynamic-elementkit', 'dynamic-elementkit_page_dek-templates'], true)
+            !in_array($screen->id, ['toplevel_page_dynamic-elementkit', 'dynamic-elementkit_page_dek-templates', 'dynamic-elementkit_page_dek-landing-pages'], true)
         ) {
             return;
         }
+        $is_landing_modal = 'dynamic-elementkit_page_dek-landing-pages' === $screen->id;
         ?>
         <div id="wpb-modal-overlay" class="wpb-modal-overlay" style="display:none;">
             <div class="wpb-modal">
                 <div class="wpb-modal-header">
-                    <h2><?php _e('Add New Template', 'dynamic-elementkit'); ?></h2>
+                    <h2><?php echo $is_landing_modal ? esc_html__('Add Landing Page', 'dynamic-elementkit') : esc_html__('Add New Template', 'dynamic-elementkit'); ?></h2>
                     <button type="button" class="wpb-modal-close">&times;</button>
                 </div>
                 <div class="wpb-modal-body">
                     <form id="wpb-create-template-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                        <input type="hidden" name="action" value="dek_create_template" />
+                        <input type="hidden" name="action" value="<?php echo $is_landing_modal ? 'dek_create_landing' : 'dek_create_template'; ?>" />
                         <input type="hidden" name="dek_create_nonce" value="<?php echo esc_attr(wp_create_nonce('dek_create_template')); ?>" />
 
                         <table class="form-table">
@@ -669,12 +715,15 @@ class DEK_Admin {
                             <tr>
                                 <th scope="row"><label for="dek_template_type"><?php _e('Template location', 'dynamic-elementkit'); ?></label></th>
                                 <td>
+                <?php if ($is_landing_modal): ?>
+                    <input type="hidden" name="dek_template_type" value="landing" />
+                    <strong><?php _e('Landing Page', 'dynamic-elementkit'); ?></strong>
+                <?php else: ?>
                 <select id="dek_template_type" name="dek_template_type" required>
                     <option value=""><?php _e('Select Type', 'dynamic-elementkit'); ?></option>
                     <option value="general"><?php _e('General Page', 'dynamic-elementkit'); ?></option>
                     <option value="header"><?php _e('Site Header', 'dynamic-elementkit'); ?></option>
                     <option value="footer"><?php _e('Site Footer', 'dynamic-elementkit'); ?></option>
-                    <option value="landing"><?php _e('Landing Page', 'dynamic-elementkit'); ?></option>
                     <option value="shop"><?php _e('Shop', 'dynamic-elementkit'); ?></option>
                     <option value="cart"><?php _e('Cart', 'dynamic-elementkit'); ?></option>
                     <option value="checkout"><?php _e('Checkout', 'dynamic-elementkit'); ?></option>
@@ -685,8 +734,10 @@ class DEK_Admin {
                     <option value="product-tag"><?php _e('Product Tag', 'dynamic-elementkit'); ?></option>
                     <option value="archive"><?php _e('Archive (Shop/Category/Tag)', 'dynamic-elementkit'); ?></option>
                 </select>
+                <?php endif; ?>
                                 </td>
                             </tr>
+                            <?php if ($is_landing_modal): ?>
                             <tr>
                                 <th scope="row"><label for="dek_landing_product_id"><?php _e('Landing product', 'dynamic-elementkit'); ?></label></th>
                                 <td>
@@ -713,6 +764,7 @@ class DEK_Admin {
                                     <p class="description"><?php _e('Assign a product to this landing page. The Single Product widgets, Checkout Form set to Current Product, and Product dynamic tags will use it automatically.', 'dynamic-elementkit'); ?></p>
                                 </td>
                             </tr>
+                            <?php endif; ?>
                         </table>
                         <div class="wpb-modal-footer">
                             <button type="submit" class="button button-primary"><?php _e('Save', 'dynamic-elementkit'); ?></button>
