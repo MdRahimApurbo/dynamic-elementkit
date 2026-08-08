@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.2.9
+ * Version: 2.3.0
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.2.9');
+define('DEK_VERSION', '2.3.0');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -2393,21 +2393,56 @@ function dek_register_elementor_template_document() {
     if (!class_exists('\Elementor\Plugin') || !\Elementor\Plugin::$instance->frontend) {
         return;
     }
-    $active_template = dek_get_current_landing_template() ?: dek_get_current_editor_template() ?: dek_get_current_active_template();
-    if (!$active_template) {
+
+    $editor_template = dek_get_current_editor_template();
+    $templates = [];
+    $request_template = dek_get_current_landing_template() ?: $editor_template ?: dek_get_current_active_template();
+    if ($request_template) {
+        $templates[] = $request_template;
+    }
+
+    // Site templates render after wp_head(), so their documents and CSS must
+    // be registered during the early enqueue pass as well.
+    if (!$editor_template) {
+        foreach (['header', 'footer'] as $location) {
+            $site_template = dek_get_active_site_template($location);
+            if ($site_template) {
+                $templates[] = $site_template;
+            }
+        }
+    }
+
+    if (!$templates) {
         return;
     }
-    $template_id = (int) $active_template->ID;
-    $document = \Elementor\Plugin::$instance->documents->get($template_id);
-    if (!$document || !$document->is_built_with_elementor()) {
-        return;
+
+    global $dek_elementor_template_ids;
+    $dek_elementor_template_ids = [];
+
+    foreach ($templates as $active_template) {
+        $template_id = (int) $active_template->ID;
+        if (!$template_id || in_array($template_id, $dek_elementor_template_ids, true)) {
+            continue;
+        }
+
+        $document = \Elementor\Plugin::$instance->documents->get($template_id);
+        if (!$document || !$document->is_built_with_elementor()) {
+            continue;
+        }
+
+        if (class_exists('DEK_Elementor_Style_Manager')) {
+            DEK_Elementor_Style_Manager::refresh_missing_atomic_css(
+                $template_id,
+                $editor_template ? 'preview' : 'frontend'
+            );
+        }
+
+        // Discover conditional widget assets before Elementor enqueues them.
+        $document->update_runtime_elements();
+        // Let Elementor (including its v4 atomic-style manager) own CSS generation.
+        do_action('elementor/post/render', $template_id);
+        $dek_elementor_template_ids[] = $template_id;
     }
-    // Discover conditional widget assets before Elementor enqueues them.
-    $document->update_runtime_elements();
-    // Let Elementor (including its v4 atomic-style manager) own CSS generation.
-    do_action('elementor/post/render', $template_id);
-    global $dek_elementor_template_id;
-    $dek_elementor_template_id = $template_id;
 }
 
 add_action('wp_enqueue_scripts', 'dek_register_elementor_template_document', 1);
@@ -2422,13 +2457,15 @@ add_action('wp_enqueue_scripts', 'dek_register_elementor_template_document', 1);
  * not schedule this pass by itself for these requests.
  */
 function dek_enqueue_elementor_template_styles() {
-    global $dek_elementor_template_id;
-    if (empty($dek_elementor_template_id) || !class_exists('\Elementor\Plugin')) {
+    global $dek_elementor_template_ids;
+    if (empty($dek_elementor_template_ids) || !class_exists('\Elementor\Plugin')) {
         return;
     }
     \Elementor\Plugin::$instance->frontend->enqueue_styles();
     // Keep legacy/v3 post CSS working on mixed Elementor documents.
-    \Elementor\Core\Files\CSS\Post::create((int) $dek_elementor_template_id)->enqueue();
+    foreach ($dek_elementor_template_ids as $template_id) {
+        \Elementor\Core\Files\CSS\Post::create((int) $template_id)->enqueue();
+    }
 }
 
 add_action('wp_enqueue_scripts', 'dek_enqueue_elementor_template_styles', PHP_INT_MAX);

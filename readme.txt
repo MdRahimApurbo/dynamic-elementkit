@@ -82,6 +82,10 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.3.0 =
+* Register active Elementor Header and Footer documents before frontend styles are printed.
+* Automatically restore missing Elementor atomic CSS for site-wide templates.
+
 = 2.2.9 =
 * Automatically regenerate missing Elementor 4 atomic preview CSS files.
 * Disable browser caching for authenticated template preview responses.
