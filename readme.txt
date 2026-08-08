@@ -82,6 +82,10 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.1.5 =
+* Added modular Core, Admin, Assets, Elementor, Frontend, and WooCommerce module boundaries
+* Centralized module registration and compatibility loading
+
 = 2.1.4 =
 * Expanded templates beyond WooCommerce with General Page, Site Header, Site Footer, and Landing Page types
 * Added site-wide Elementor header and footer rendering

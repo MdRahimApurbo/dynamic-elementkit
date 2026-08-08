@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.1.4
+ * Version: 2.1.5
 
  * Author: Md Rahim Apurbo
 
@@ -48,39 +48,13 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.1.4');
+define('DEK_VERSION', '2.1.5');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 define('DEK_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 define('DEK_PLUGIN_BASENAME', plugin_basename(__FILE__));
-
-
-
-/**
-
- * Declare WooCommerce compatibility
-
- */
-
-add_action('before_woocommerce_init', function() {
-
-    if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
-
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
-
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
-
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('product_blocks', __FILE__, true);
-
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('settings_pages', __FILE__, true);
-
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('analytics', __FILE__, true);
-
-    }
-
-});
 
 
 
@@ -2065,14 +2039,6 @@ function dek_render_site_template($type) {
     }
 }
 
-add_action('wp_body_open', function() {
-    dek_render_site_template('header');
-}, 1);
-
-add_action('wp_footer', function() {
-    dek_render_site_template('footer');
-}, 1);
-
 /**
  * Resolve a published template opened through /landing/{slug}/.
  */
@@ -2539,11 +2505,22 @@ class Dynamic_ElementKit {
 
     private function includes() {
 
-        require_once DEK_PLUGIN_PATH . 'src/class-admin-page.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Core/interface-module.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Core/class-module-loader.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Admin/class-admin-module.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Assets/class-assets-module.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Elementor/class-elementor-module.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/Frontend/class-frontend-module.php';
+        require_once DEK_PLUGIN_PATH . 'src/Modules/WooCommerce/class-woocommerce-module.php';
 
-        require_once DEK_PLUGIN_PATH . 'src/class-template-table.php';
-
-        require_once DEK_PLUGIN_PATH . 'src/Elementor/Widgets/widget-loader.php';
+        $loader = new DEK_Module_Loader();
+        $loader
+            ->add(new DEK_Admin_Module())
+            ->add(new DEK_Assets_Module($this))
+            ->add(new DEK_Elementor_Module())
+            ->add(new DEK_Frontend_Module())
+            ->add(new DEK_WooCommerce_Module())
+            ->register();
 
     }
 
@@ -2554,12 +2531,6 @@ class Dynamic_ElementKit {
         add_action('plugins_loaded', [$this, 'load_textdomain']);
 
         add_action('elementor/dynamic_tags/register', [$this, 'register_dynamic_tags']);
-
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
-
-        add_action('elementor/editor/before_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
-
-        add_action('elementor/editor/after_enqueue_styles', [$this, 'enqueue_frontend_assets']);
 
     }
 

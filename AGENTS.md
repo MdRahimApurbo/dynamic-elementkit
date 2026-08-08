@@ -11,6 +11,7 @@ Dynamic ElementKit is a WordPress plugin that adds Elementor widgets, dynamic ta
 - `src/class-template-table.php` — template list table and admin actions.
 - `src/Elementor/Widgets/` — Elementor widget implementations.
 - `src/Elementor/DynamicTags/` — Elementor dynamic tag implementations.
+- `src/Modules/` — module registration boundaries for Admin, Assets, Elementor, Frontend, WooCommerce, and Core loading.
 - `templates/override.php` — frontend Elementor document rendering override.
 - `assets/` — frontend and admin CSS/JavaScript.
 - `SECURITY.md` — security expectations and the ClickFix/malware response checklist.
