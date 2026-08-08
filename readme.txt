@@ -82,6 +82,11 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.2 =
+* Restricted public URLs to Landing Pages only; headers, footers, and templates no longer use `/landing/`
+* Removed the URL column from the generic Templates screen
+* Made active Elementor headers and footers replace common theme header/footer containers
+
 = 2.2.1 =
 * Refined the dashboard with balanced quick-access cards and clear primary actions
 

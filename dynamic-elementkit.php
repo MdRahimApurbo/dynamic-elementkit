@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.2.1
+ * Version: 2.2.2
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.2.1');
+define('DEK_VERSION', '2.2.2');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -2040,6 +2040,58 @@ function dek_render_site_template($type) {
 }
 
 /**
+ * Return the published active site template for a location.
+ */
+function dek_get_active_site_template($type) {
+    $template = dek_get_active_template($type);
+    return $template && 'publish' === $template->post_status ? $template : false;
+}
+
+add_filter('body_class', function($classes) {
+    if (dek_get_active_site_template('header')) {
+        $classes[] = 'dek-replace-theme-header';
+    }
+
+    if (dek_get_active_site_template('footer')) {
+        $classes[] = 'dek-replace-theme-footer';
+    }
+
+    return $classes;
+});
+
+/**
+ * Prevent the active Elementor header/footer from being displayed alongside
+ * common theme header/footer containers.
+ */
+add_action('wp_head', function() {
+    if (is_admin()) {
+        return;
+    }
+
+    $header_active = (bool) dek_get_active_site_template('header');
+    $footer_active = (bool) dek_get_active_site_template('footer');
+    if (!$header_active && !$footer_active) {
+        return;
+    }
+    ?>
+    <style id="dek-theme-location-replacement">
+        <?php if ($header_active) : ?>
+        body.dek-replace-theme-header #masthead,
+        body.dek-replace-theme-header #site-header,
+        body.dek-replace-theme-header .site-header,
+        body.dek-replace-theme-header .wp-site-blocks > header { display: none !important; }
+        <?php endif; ?>
+        <?php if ($footer_active) : ?>
+        body.dek-replace-theme-footer #colophon,
+        body.dek-replace-theme-footer #site-footer,
+        body.dek-replace-theme-footer .site-footer,
+        body.dek-replace-theme-footer .wp-site-blocks > footer { display: none !important; }
+        <?php endif; ?>
+    </style>
+    <?php
+}, 99);
+
+/**
  * Resolve a published template opened through /landing/{slug}/.
  */
 function dek_get_current_landing_template() {
@@ -2048,12 +2100,41 @@ function dek_get_current_landing_template() {
     }
 
     $template = get_queried_object();
-    if ($template instanceof \WP_Post && 'publish' === $template->post_status) {
+    if (
+        $template instanceof \WP_Post &&
+        'publish' === $template->post_status &&
+        'landing' === get_post_meta($template->ID, '_dek_template_type', true)
+    ) {
         return $template;
     }
 
     return false;
 }
+
+/**
+ * Only Landing Page templates may be opened directly on the public site.
+ */
+function dek_restrict_non_landing_template_urls() {
+    if (!is_singular('dek_template') || dek_get_current_landing_template()) {
+        return;
+    }
+
+    if (is_preview() && current_user_can('edit_post', get_queried_object_id())) {
+        return;
+    }
+
+    global $wp_query;
+    $wp_query->set_404();
+    status_header(404);
+    nocache_headers();
+    $not_found_template = get_404_template();
+    if ($not_found_template) {
+        require $not_found_template;
+    }
+    exit;
+}
+
+add_action('template_redirect', 'dek_restrict_non_landing_template_urls', 0);
 
 /**
  * Resolve the WooCommerce product assigned to a public landing template.

@@ -8,13 +8,15 @@ if (!class_exists('WP_List_Table')) {
 class DEK_Template_Table extends WP_List_Table {
 
     private $template_type = '';
+    private $exclude_landing = false;
 
     private function get_admin_page() {
         return 'landing' === $this->template_type ? 'dek-landing-pages' : 'dek-templates';
     }
 
-    public function __construct($template_type = '') {
+    public function __construct($template_type = '', $exclude_landing = false) {
         $this->template_type = sanitize_key($template_type);
+        $this->exclude_landing = (bool) $exclude_landing;
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         $screen_id = $screen ? $screen->id : 'dynamic-elementkit_page_dek-templates';
         parent::__construct([
@@ -30,10 +32,14 @@ class DEK_Template_Table extends WP_List_Table {
             'cb'     => '<input type="checkbox" />',
             'name'   => __('Name', 'dynamic-elementkit'),
             'type'   => __('Type', 'dynamic-elementkit'),
-            'url'    => __('Public URL', 'dynamic-elementkit'),
-            'active' => __('Active', 'dynamic-elementkit'),
-            'date'   => __('Date', 'dynamic-elementkit'),
         ];
+
+        if ('landing' === $this->template_type) {
+            $columns['url'] = __('Landing URL', 'dynamic-elementkit');
+        }
+
+        $columns['active'] = __('Active', 'dynamic-elementkit');
+        $columns['date'] = __('Date', 'dynamic-elementkit');
         return $columns;
     }
 
@@ -100,6 +106,19 @@ class DEK_Template_Table extends WP_List_Table {
                 [
                     'key'   => '_dek_template_type',
                     'value' => $this->template_type,
+                ],
+            ];
+        } elseif ($this->exclude_landing) {
+            $args['meta_query'] = [
+                'relation' => 'OR',
+                [
+                    'key'     => '_dek_template_type',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_dek_template_type',
+                    'value'   => 'landing',
+                    'compare' => '!=',
                 ],
             ];
         }

@@ -391,7 +391,7 @@ class DEK_Admin {
             return;
         }
 
-        $list_table = new DEK_Template_Table();
+        $list_table = new DEK_Template_Table('', true);
         $list_table->prepare_items();
         ?>
         <div class="wrap wpb-wrap">
