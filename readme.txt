@@ -82,6 +82,13 @@ Enter your GitHub repository URL in the plugin settings page to enable automatic
 
 == Changelog ==
 
+= 2.2.5 =
+* Fixed Elementor preview 404 errors by resolving `elementor-preview` template IDs directly
+
+= 2.2.4 =
+* Fixed Elementor authenticated previews for Header, Footer, and other non-landing templates
+* Kept non-landing templates private while allowing their Elementor editor canvas to load
+
 = 2.2.3 =
 * Restored standard right-side spacing for template and landing-page tables
 

@@ -14,7 +14,11 @@ if ($dek_active_template && isset($dek_active_template->post_content)) {
     });
 }
 
-get_header();
+$is_elementor_preview = isset($_GET['elementor-preview']);
+
+if (!$is_elementor_preview) {
+    get_header();
+}
 
 if ($dek_active_template && isset($dek_active_template->post_content)) {
     if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->frontend) {
@@ -34,4 +38,6 @@ if ($dek_active_template && isset($dek_active_template->post_content)) {
     woocommerce_content();
 }
 
-get_footer();
+if (!$is_elementor_preview) {
+    get_footer();
+}

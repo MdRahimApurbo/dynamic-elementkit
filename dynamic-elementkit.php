@@ -8,7 +8,7 @@
 
  * Description: Build Elementor templates for WordPress pages, headers, footers, and WooCommerce layouts.
 
- * Version: 2.2.3
+ * Version: 2.2.5
 
  * Author: Md Rahim Apurbo
 
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants
 
-define('DEK_VERSION', '2.2.3');
+define('DEK_VERSION', '2.2.5');
 
 define('DEK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -2022,7 +2022,12 @@ function dek_get_active_template($type) {
  * Render a site-wide Elementor header or footer when one is active.
  */
 function dek_render_site_template($type) {
-    if (is_admin() || wp_doing_ajax() || !class_exists('Elementor\\Plugin')) {
+    if (
+        is_admin() ||
+        wp_doing_ajax() ||
+        isset($_GET['elementor-preview']) ||
+        !class_exists('Elementor\\Plugin')
+    ) {
         return;
     }
 
@@ -2037,6 +2042,27 @@ function dek_render_site_template($type) {
         echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Elementor sanitizes document output.
         echo '</div>';
     }
+}
+
+/**
+ * Resolve a template while Elementor is loading its authenticated preview.
+ * Non-landing templates are never public, but must still render in Elementor.
+ */
+function dek_get_current_editor_template() {
+    $preview_id = isset($_GET['elementor-preview']) ? absint($_GET['elementor-preview']) : 0;
+    $template = $preview_id ? get_post($preview_id) : (is_singular('dek_template') ? get_queried_object() : false);
+    $is_elementor_preview = isset($_GET['elementor-preview']) || is_preview();
+    if (
+        !$is_elementor_preview ||
+        !$template instanceof \WP_Post ||
+        'dek_template' !== $template->post_type ||
+        !current_user_can('edit_post', $template->ID) ||
+        !in_array($template->post_status, ['publish', 'draft', 'pending'], true)
+    ) {
+        return false;
+    }
+
+    return $template;
 }
 
 /**
@@ -2115,11 +2141,12 @@ function dek_get_current_landing_template() {
  * Only Landing Page templates may be opened directly on the public site.
  */
 function dek_restrict_non_landing_template_urls() {
-    if (!is_singular('dek_template') || dek_get_current_landing_template()) {
-        return;
-    }
-
-    if (is_preview() && current_user_can('edit_post', get_queried_object_id())) {
+    $editor_template = dek_get_current_editor_template();
+    if (
+        (!is_singular('dek_template') && !$editor_template) ||
+        dek_get_current_landing_template() ||
+        $editor_template
+    ) {
         return;
     }
 
@@ -2366,7 +2393,7 @@ function dek_register_elementor_template_document() {
     if (!class_exists('\Elementor\Plugin') || !\Elementor\Plugin::$instance->frontend) {
         return;
     }
-    $active_template = dek_get_current_landing_template() ?: dek_get_current_active_template();
+    $active_template = dek_get_current_landing_template() ?: dek_get_current_editor_template() ?: dek_get_current_active_template();
     if (!$active_template) {
         return;
     }
@@ -2410,7 +2437,7 @@ add_action('wp_enqueue_scripts', 'dek_enqueue_elementor_template_styles', PHP_IN
  * Override WooCommerce templates
  */
 add_filter('template_include', function($template) {
-    $active_template = dek_get_current_landing_template() ?: dek_get_current_active_template();
+    $active_template = dek_get_current_landing_template() ?: dek_get_current_editor_template() ?: dek_get_current_active_template();
     if (!$active_template) {
         return $template;
     }
